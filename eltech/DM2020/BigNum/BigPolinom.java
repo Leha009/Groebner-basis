@@ -624,8 +624,8 @@ public class BigPolinom
 				buffThis.sort();
 				/*if(!buffThis.isZero())
 					buffThis.divideByHighCoef();*/
-				if(!buffThis.isZero())	//убрать?
-					buffThis.reduceCoefs();
+				/*if(!buffThis.isZero())	//убрать?
+					buffThis.gcdAndLcm();*/
 				System.out.print("T");
 				//System.out.println("\nbuffThis:" + buffThis);
 			}
@@ -743,14 +743,14 @@ public class BigPolinom
 		{
 			if(temp.isZero() && !this.factors.get(i).isZero())
 			{
-				temp.getP().setNumber(this.factors.get(i).getCoef().getP().getNumber());
+				//temp.getP().setNumber(this.factors.get(i).getCoef().getP().getNumber());
 				temp.getQ().setNumber(this.factors.get(i).getCoef().getQ().getNumber());
 			}
 			else
 			{
-				temp.getP().setNumber(temp.getP().getNumber().gcd(this.factors.get(i).getCoef().getP().getNumber()));
+				//temp.getP().setNumber(temp.getP().getNumber().gcd(this.factors.get(i).getCoef().getP().getNumber()));
 				temp.getQ().setNumber(temp.getQ().getNumber().lcm(this.factors.get(i).getCoef().getQ().getNumber()));
-				temp = temp.reduce();
+				//temp = temp.reduce();
 			}
 		}
 		for (i = 0; i < factors.size(); i++)
@@ -762,9 +762,9 @@ public class BigPolinom
 	
 	public void simpleMod()
 	{
-		BigZ simple = new BigZ("950077708875374368239634443053301088702579244657195230918021");
+		//BigZ simple = new BigZ("950077708875374368239634443053301088702579244657195230918021");
 		//BigZ simple = new BigZ("38415949717841326076959565850785329844539400959763");
-		//BigN simple = new BigN("749919681470339");
+		BigZ simple = new BigZ("226471897688985511301516652421");
 		int i;
 		BigQ temp;
 		for(i = 0; i < factors.size(); i++)
@@ -779,6 +779,7 @@ public class BigPolinom
 	private void reduceCoefs()
 	{
 		int i;
+		gcdAndLcm();
 		for(i = 0; i < this.factors.size(); i++)
 			this.factors.get(i).setCoef( this.factors.get(i).getCoef().reduce() );
 		//this.simpleMod();
@@ -786,13 +787,13 @@ public class BigPolinom
 	
 	public boolean onlyOne()
 	{
-		int i,j,required = 0;
-		for(i = 0; i < this.getHighMonom().getPowers().size(); i++)
+		int i,j,required = -1;
+		for(i = 0; i < this.getHighMonom().getPowers().size() && required == -1; i++)
 		{
-			if(required == 0)
+			if(required == -1)
 			{
 				if(this.getHighMonom().getPowers().get(i) > 0)
-					required = this.getHighMonom().getPowers().get(i);
+					required = i;
 			}
 			else
 				return false;

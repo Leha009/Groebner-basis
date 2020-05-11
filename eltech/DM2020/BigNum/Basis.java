@@ -7,7 +7,6 @@ public class Basis
 	public ArrayList<BigPolinom> polynoms = new ArrayList<BigPolinom>();
 	private ArrayList<BigPolinom> basePolynoms = new ArrayList<BigPolinom>();
 	private ArrayList<String> linked = new ArrayList<String>();	//Записываем те многочлены, с которыми уже строили S полином
-	private ArrayList<BigPolinom> buffpolynoms = new ArrayList<BigPolinom>();
 	private int maxpower;
 	
 	public void addBasis(String newPolynom)
@@ -64,7 +63,7 @@ public class Basis
 	private void Buhberger()
 	{
 		boolean f = true;
-		sPolynom();
+		sPolynom2();
 		while(f)
 		{
 			//removeDivided();
@@ -207,14 +206,14 @@ public class Basis
 	private boolean sPolynom2()
 	{
 		boolean f = false, temp;
-		Integer i,j;
+		Integer i,j,k;
 		BigPolinom buff;
-		System.out.println("size : " + this.basePolynoms.size());
-		for(i = 0; i < this.basePolynoms.size(); i++)
-			for(j = this.basePolynoms.size()-1; j >= 0; j--)
+		System.out.println("size : " + this.polynoms.size());
+		for(i = 0; i < this.polynoms.size(); i++)
+			for(j = 0; j < this.polynoms.size(); j++)
 			{
 				temp = false;
-				if(i != j && !this.polynoms.get(i).getHighMonom().gcd(this.polynoms.get(j).getHighMonom()).isConst())
+				if(i != j && !this.polynoms.get(i).getHighMonom().gcd(this.polynoms.get(j).getHighMonom()).isConst() && !this.isLinked(i,j))
 				{
 					buff = this.polynoms.get(i).sPolynom2( this.polynoms.get(j) );
 					if(!buff.isZero() && !isReducedToZero(buff))
@@ -222,12 +221,20 @@ public class Basis
 					if(!this.isLinked(i,j))
 						addLink(i,j);
 					if(temp)
+					{
 						linked.add("");
+					}
 					if(!f)
 						f = temp;
 					System.out.println("SPoly: " + i + " : " + j + " size:" + this.polynoms.size());
 				}
 			}
+		/*for(i = 0; i < this.polynoms.size(); i++)
+		{
+			buff = this.polynoms.get(i);
+			buff.divideByHighCoef();
+			this.polynoms.set(i, buff);
+		}*/
 		copyBasis();
 		newLinkList();
 		return f;
