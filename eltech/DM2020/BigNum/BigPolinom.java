@@ -624,7 +624,7 @@ public class BigPolinom
 				buffThis.sort();
 				/*if(!buffThis.isZero())
 					buffThis.divideByHighCoef();*/
-				/*if(!buffThis.isZero())	//убрать?
+				/*if(!buffThis.isZero())	//убрать!
 					buffThis.gcdAndLcm();*/
 				System.out.print("T");
 				//System.out.println("\nbuffThis:" + buffThis);
@@ -743,14 +743,14 @@ public class BigPolinom
 		{
 			if(temp.isZero() && !this.factors.get(i).isZero())
 			{
-				//temp.getP().setNumber(this.factors.get(i).getCoef().getP().getNumber());
+				temp.getP().setNumber(this.factors.get(i).getCoef().getP().getNumber());
 				temp.getQ().setNumber(this.factors.get(i).getCoef().getQ().getNumber());
 			}
 			else
 			{
-				//temp.getP().setNumber(temp.getP().getNumber().gcd(this.factors.get(i).getCoef().getP().getNumber()));
+				temp.getP().setNumber(temp.getP().getNumber().gcd(this.factors.get(i).getCoef().getP().getNumber()));
 				temp.getQ().setNumber(temp.getQ().getNumber().lcm(this.factors.get(i).getCoef().getQ().getNumber()));
-				//temp = temp.reduce();
+				temp = temp.reduce();
 			}
 		}
 		for (i = 0; i < factors.size(); i++)

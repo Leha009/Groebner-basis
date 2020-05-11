@@ -320,6 +320,17 @@ public class BigMonom
 		return true;
 	}
 	
+	public int getHighPower()
+	{
+		int i;
+		for(i = 0; i < this.powers.size(); i++)
+		{
+			if(this.powers.get(i) != 0)
+				return i;
+		}
+		return i;
+	}
+	
 	public ArrayList<Integer> getPowers()
 	{
 		return powers;
