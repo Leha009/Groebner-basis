@@ -331,6 +331,17 @@ public class BigMonom
 		return i;
 	}
 	
+	public int cmpTo(BigMonom other)
+	{
+		int i,s1,s2;
+		for(i = 0, s1 = 0, s2 = 0; i < this.powers.size(); i++)
+		{
+			s1 += this.powers.get(i);
+			s2 += other.powers.get(i);
+		}
+		return s1 >= s2 ? 1 : s1 == s2 ? 0 : -1;
+	}
+	
 	public ArrayList<Integer> getPowers()
 	{
 		return powers;

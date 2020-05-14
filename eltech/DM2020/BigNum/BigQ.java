@@ -367,6 +367,30 @@ public class BigQ
 		return result;
 	}
 	
+	/**
+	* Остаток от деления на простое число BigQ
+	*
+	* @return BigQ - остаток
+	*
+	* @version 
+	* @author 
+	*/
+	public BigQ mod(BigQ other) throws ArithmeticException
+	{
+		BigQ result = this.clone();
+		BigQ buffOther = other.clone();
+		if( other.isZero() )
+			throw new ArithmeticException("Нельзя делить на 0\n");
+		
+		buffOther.q = result.q.clone();
+		buffOther.p = buffOther.p.multiply(result.q);
+		
+		while(result.compareTo(buffOther) > 0)
+			result = result.subtract(buffOther);
+		result.reduce();
+		return result;
+	}
+	
 	public BigZ getP()
 	{
 		return p;
