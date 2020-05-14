@@ -56,7 +56,6 @@ public class Basis
 	{
 		newLinkList();
 		boolean f = true;
-		//simple3();
 		sPolynom2();
 		if(polynoms.size() == basePolynoms.size())
 			sPolynom();
@@ -161,7 +160,7 @@ public class Basis
 		int i = 0;
 		do				//Упрощаем базисы
 		{
-			buff = this.polynoms.get(i).reduce2(this.polynoms);	//reduce2
+			buff = this.polynoms.get(i).reduce22(this.polynoms);	//reduce2
 			if(!(buff.equals2(this.polynoms.get(i))))
 			{
 				if(buff.isZero())
@@ -205,17 +204,16 @@ public class Basis
 	private boolean sPolynom2()
 	{
 		boolean f = false, temp;
-		Integer i,j,k;
+		Integer i,j,k,n;
 		BigPolinom buff;
 		System.out.println("size : " + this.polynoms.size());
 		for(i = 0; i < this.polynoms.size(); i++)
 			for(j = 0; j < this.polynoms.size(); j++)
 			{
 				temp = false;
-				if(i != j && !this.isLinked(i,j) && !this.polynoms.get(i).getHighMonom().gcd(this.polynoms.get(j).getHighMonom()).isConst())
+				if(i != j && !this.polynoms.get(i).getHighMonom().gcd(this.polynoms.get(j).getHighMonom()).isConst() && !this.isLinked(i,j))
 				{
-					//buff = this.polynoms.get(i).sPolynom2( this.polynoms.get(j) );
-					buff = this.polynoms.get(i).sPolynom( this.polynoms.get(j) );
+					buff = this.polynoms.get(i).sPolynom2( this.polynoms.get(j) );
 					if(!buff.isZero() && !isReducedToZero(buff))
 						temp = buff.reduce(this.polynoms);
 					if(!this.isLinked(i,j))
@@ -342,7 +340,9 @@ public class Basis
 	x1^2+x1-x2x3
 	x1x3-x2^2-x2
 	
-	xy-z^2-z x^2+x-yz xz-y^2-y
+	xy-z^2-z
+	x^2+x-yz
+	xz-y^2-y
 	
 	2
 	x2^2-1
