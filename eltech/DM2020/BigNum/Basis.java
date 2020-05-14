@@ -4,10 +4,19 @@ import java.util.*;
 
 public class Basis
 {
-	public ArrayList<BigPolinom> polynoms = new ArrayList<BigPolinom>();
-	private ArrayList<BigPolinom> basePolynoms = new ArrayList<BigPolinom>();
-	private ArrayList<String> linked = new ArrayList<String>();	//Записываем те многочлены, с которыми уже строили S полином
-	private int maxpower;
+	public ArrayList<BigPolinom> polynoms = new ArrayList<BigPolinom>();		//Базис Грёбнера
+	private ArrayList<BigPolinom> basePolynoms = new ArrayList<BigPolinom>();	//Исходные уравнения
+	private ArrayList<String> linked = new ArrayList<String>();	//Записываем номера тех многочленов, с которыми уже строили S полином
+	private int maxpower;														//Кол-во неизвестных
+	private BigPolinom decision;
+	
+	public void clearBasis()
+	{
+		while(basePolynoms.size() > 0)
+			basePolynoms.remove(0);
+		while(polynoms.size() > 0)
+			polynoms.remove(0);
+	}
 	
 	public void addBasis(String newPolynom)
 	{
@@ -24,10 +33,34 @@ public class Basis
 	{
 		Buhberger();
 		removeDivided();
-		output();
+		//output();
 	}
 	
-	public void output()
+	public void outputBase(int type)
+	{
+		Scanner in = new Scanner(System.in);
+		int i;
+		String buffS;
+		if(this.basePolynoms.size() != 0)
+		{
+			System.out.println("Количество уравнений: " + this.basePolynoms.size());
+			for(i = 0; i < this.basePolynoms.size(); i++)
+			{
+				buffS = this.basePolynoms.get(i).toString();
+				if(type != 0)
+				{
+					buffS = buffS.replace("x1", "x");
+					buffS = buffS.replace("x2", "y");
+					buffS = buffS.replace("x3", "z");
+				}
+				System.out.println(buffS + "\n");
+			}
+		}
+		else
+			System.out.println("Вы не вводили уравнения. Введите input(или in), чтобы ввести их.");
+	}
+	
+	public void output(int type)
 	{
 		int i;
 		String buffS;
@@ -42,7 +75,7 @@ public class Basis
 		for(i = 0; i < this.polynoms.size(); i++)
 		{
 			buffS = this.polynoms.get(i).toString();
-			if(maxpower < 4)
+			if(type != 0)
 			{
 				buffS = buffS.replace("x1", "x");
 				buffS = buffS.replace("x2", "y");
@@ -72,7 +105,7 @@ public class Basis
 				sPolynom2();
 			}
 			removeEquals();//equals
-			System.out.println(f);
+			//System.out.println(f);
 		}
 		removeEquals();
 	}
@@ -87,7 +120,6 @@ public class Basis
 				if(i != j)
 					if(this.polynoms.get(i).getHighMonom().isDivided(this.polynoms.get(j).getHighMonom()))
 					{
-					//if(this.polynoms.get(i).equals2(this.polynoms.get(j)))
 						this.polynoms.remove(i);
 						linked.remove(i);
 						i = 0;
@@ -114,46 +146,7 @@ public class Basis
 			}
 		}
 	}
-	
-	/*private void simple()
-	{
-		int i;
-		for(i = 0; i < this.polynoms.size(); i++)				//Упрощаем базисы
-		{
-			this.polynoms.set(i, this.polynoms.get(i).reduce2(this.polynoms));
-			//System.out.println("TEST " + this.polynoms.get(i).isZero() + " i = " + i);
-			if(this.polynoms.get(i).isZero())
-			{
-				this.polynoms.remove(i);
-				i--;
-			}
-		}
-	}
-	
-	private boolean simple2()
-	{
-		BigPolinom buff;
-		int i = 0;
-		boolean res = false;
-		System.out.println("Размер: " + this.polynoms.size());
-		for(i = 0; i < this.polynoms.size(); i++)				//Упрощаем базисы
-		{
-			buff = this.polynoms.get(i);
-			this.polynoms.set(i, this.polynoms.get(i).reduce2(this.polynoms));
-			//System.out.println("TEST " + this.polynoms.get(i).isZero() + " i = " + i);
-			if(this.polynoms.get(i).isZero())
-			{
-				this.polynoms.remove(i);
-				i--;
-			}
-			else if(!this.polynoms.get(i).equals2(buff))
-				res = true;
-			System.out.println(i + "/" + (this.polynoms.size()-1));
-		}
-		copyBasis();
-		return res;
-	}*/
-	
+
 	private boolean simple3()
 	{
 		boolean f = false;
@@ -173,15 +166,8 @@ public class Basis
 					f = true;
 			}
 			i++;
-			System.out.println(i + "/" + this.polynoms.size());
+			//System.out.println(i + "/" + this.polynoms.size());
 		} while(i < this.polynoms.size());
-		/*for(i = 0; i < this.polynoms.size(); i++)
-		{
-			/*buff = this.polynoms.get(i);
-			buff.divideByHighCoef();
-			this.polynoms.set(i, buff);
-		}*/
-		//copyBasis();
 		newLinkList();
 		return f;
 	}
@@ -192,14 +178,12 @@ public class Basis
 		for(i = 0; i < this.basePolynoms.size(); i++)
 			for(j = i+1; j < this.basePolynoms.size(); j++)
 			{
-				//System.out.println(this.isLinked(i,j));
 				if(!this.isLinked(i,j))
 				{
 					this.basePolynoms.get(i).sPolynom( this.basePolynoms.get(j) ).reduce(this.polynoms);
 					linked.add("");
 				}
 			}
-		//copyBasis();
 	}
 	
 	private boolean sPolynom2()
@@ -207,7 +191,7 @@ public class Basis
 		boolean f = false, temp;
 		Integer i,j,k;
 		BigPolinom buff;
-		System.out.println("size : " + this.polynoms.size());
+		//System.out.println("size : " + this.polynoms.size());
 		for(i = 0; i < this.polynoms.size(); i++)
 			for(j = 0; j < this.polynoms.size(); j++)
 			{
@@ -226,7 +210,7 @@ public class Basis
 					}
 					if(!f)
 						f = temp;
-					System.out.println("SPoly: " + i + " : " + j + " size:" + this.polynoms.size());
+					//System.out.println("SPoly: " + i + " : " + j + " size:" + this.polynoms.size());
 				}
 			}
 		/*for(i = 0; i < this.polynoms.size(); i++)
@@ -235,7 +219,6 @@ public class Basis
 			buff.divideByHighCoef();
 			this.polynoms.set(i, buff);
 		}*/
-		//newLinkList();
 		return f;
 	}
 	
@@ -260,7 +243,7 @@ public class Basis
 		linked.set(ths, buffLink);
 	}
 	
-	public boolean isReducedToZero(BigPolinom ths)
+	private boolean isReducedToZero(BigPolinom ths)
 	{
 		boolean f;
 		int i,j;
@@ -273,7 +256,7 @@ public class Basis
 		return false;
 	}
 	
-	public void newLinkList()
+	private void newLinkList()
 	{
 		int i;
 		while(linked.size() > 0)
@@ -285,44 +268,33 @@ public class Basis
 	public void decision()
 	{
 		BigPolinom buf;
-		BigPolinom end = new BigPolinom(this.polynoms.get(0).getFactors().get(0).getPowers().size(), "1");
-		for(int i=0; i < this.polynoms.size(); i++)
+		BigPolinom end = new BigPolinom(this.polynoms.get(0).getFactors().get(0).getPowers().size(), "0");
+		for(int i=0; i < this.basePolynoms.size(); i++)
 		{
 			buf = this.basePolynoms.get(i);
-			System.out.print("\nИзначально ");
-			System.out.println(buf);
 			for(int j=0; j < this.polynoms.size(); j++)
 			{
 				if (!buf.divide(this.polynoms.get(j)).isZero())
 				{
-					System.out.print("\nС помощью чего сокращаем: ");
-					System.out.println(this.polynoms.get(j));
 					if(buf.mod(this.polynoms.get(j)).isZero())
 					{
 						break;
 					}
 					buf=buf.mod(this.polynoms.get(j));
-					System.out.print("\nОстаток ");
-					System.out.println(buf);
 				}
 			}
-			System.out.print("\nЧто должны добавить: ");
-			System.out.println(buf);
-			end = end.add(buf);
-			System.out.print("\nКонец ");
-			System.out.println(end);
+			if(buf.onlyOne()) {
+				end = end.add(buf);
+			}
+			decision = end.clone();
 		}
 	}
 	
-	private void copyBasis()
+	public void outputDecision()
 	{
-		int i;
-		while(polynoms.size() > basePolynoms.size())
-			basePolynoms.add(new BigPolinom(maxpower, "0"));
-		while(basePolynoms.size() > polynoms.size())
-			basePolynoms.remove(basePolynoms.size()-1);
-		for(i = 0; i < polynoms.size(); i++)
-			basePolynoms.set(i, polynoms.get(i).clone());
+		if(decision == null)
+			decision();
+		System.out.println(decision);
 	}
 }
 
@@ -342,7 +314,9 @@ public class Basis
 	x1^2+x1-x2x3
 	x1x3-x2^2-x2
 	
-	xy-z^2-z x^2+x-yz xz-y^2-y
+	xy-z^2-z
+	x^2+x-yz
+	xz-y^2-y
 	
 	2
 	x2^2-1
@@ -366,5 +340,4 @@ public class Basis
 	
 	-6x^2+6x-6y^2+6y-2
 	4x^3-6x^2-4y^3+6y^2
-
 */

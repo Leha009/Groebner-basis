@@ -435,7 +435,7 @@ public class BigPolinom
             result = buffThis.mod(buffOther);
 			buffThis = buffOther;
 			buffOther = result;
-			System.out.println(buffThis + " : " + buffOther + " !! " + result);
+			//System.out.println(buffThis + " : " + buffOther + " !! " + result);
         }
 		//result.divideByHighCoef();
 		if(result.isZero())
@@ -638,7 +638,7 @@ public class BigPolinom
 					buffThis.divideByHighCoef();*/
 				/*if(!buffThis.isZero())	//убрать?
 					buffThis.simpleMod();*/
-				System.out.print("T");
+				//System.out.print("T");
 				//System.out.println("\nbuffThis:" + buffThis);
 			}
 		} while(!buffThis.isZero());
@@ -690,8 +690,8 @@ public class BigPolinom
 				/*if(!buffThis.isZero())
 					buffThis.simpleMod();*/
 			}
-			System.out.print("T");
-			System.out.println("\nbuffThis:" + buffThis);
+			//System.out.print("T");
+			//System.out.println("\nbuffThis:" + buffThis);
 		} while(!buffThis.isZero());
 		result.sort();
 		/*if(!result.isZero())
