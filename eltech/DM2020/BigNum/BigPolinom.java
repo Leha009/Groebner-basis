@@ -800,16 +800,16 @@ public class BigPolinom
 	
 	public boolean onlyOne()
 	{
+		if(this.getHighMonom().isConst())
+			return true;
 		int i,j,required = -1;
-		for(i = 0; i < this.getHighMonom().getPowers().size() && required == -1; i++)
+		for(i = 0; i < this.getHighMonom().getPowers().size(); i++)
 		{
-			if(required == -1)
-			{
-				if(this.getHighMonom().getPowers().get(i) > 0)
+			if(this.getHighMonom().getPowers().get(i) > 0)
+				if(required == -1)
 					required = i;
-			}
-			else
-				return false;
+				else
+					return false;
 		}
 		for(i = 1; i < this.factors.size(); i++)
 		{

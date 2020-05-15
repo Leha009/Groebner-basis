@@ -19,7 +19,7 @@ public class Colloquium
 	{
 		System.out.println("Для ознакомления с программой введите \"?\" или \"help\"");
 		Interface();
-		//base.decision();*/
+		
 	}
 	
 	private static void Interface()
