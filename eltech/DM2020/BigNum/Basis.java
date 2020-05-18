@@ -7,6 +7,9 @@ public class Basis
 	public ArrayList<BigPolinom> polynoms = new ArrayList<BigPolinom>();		//Базис Грёбнера
 	private ArrayList<BigPolinom> basePolynoms = new ArrayList<BigPolinom>();	//Исходные уравнения
 	private ArrayList<String> linked = new ArrayList<String>();	//Записываем номера тех многочленов, с которыми уже строили S полином
+	
+	
+	
 	private int maxpower;														//Кол-во неизвестных
 	private BigPolinom decision;
 	
@@ -32,7 +35,7 @@ public class Basis
 	public void doActions()
 	{
 		Buhberger();
-		removeDivided();
+		//removeDivided();
 		//output();
 	}
 	
@@ -89,11 +92,10 @@ public class Basis
 	{
 		newLinkList();
 		boolean f = true;
-		//simple3();
-		sPolynom2();
-		if(polynoms.size() == basePolynoms.size())
+		//sPolynom2();
+		if(polynoms.size() < 3)// basePolynoms.size())
 			sPolynom();
-		while(f)
+		/*while(f)
 		{
 			//removeDivided();
 			f = simple3();
@@ -106,6 +108,14 @@ public class Basis
 			}
 			removeEquals();//equals
 			//System.out.println(f);
+		}*/
+		//while(simple3());
+		while(f)
+		{
+			while(sPolynom2());
+			//sPolynom2();
+			while(simple3());
+			f = sPolynom2();
 		}
 		removeEquals();
 	}
@@ -115,16 +125,15 @@ public class Basis
 		int i,j;
 		for(i = 0; i < this.polynoms.size(); i++)
 		{
-			for(j = 0; j < this.polynoms.size(); j++)
+			for(j = i+1; j < this.polynoms.size(); j++)
 			{
-				if(i != j)
-					if(this.polynoms.get(i).getHighMonom().isDivided(this.polynoms.get(j).getHighMonom()))
-					{
-						this.polynoms.remove(i);
-						linked.remove(i);
-						i = 0;
-						j = 0;
-					}
+				if(this.polynoms.get(i).getHighMonom().isDivided(this.polynoms.get(j).getHighMonom()))
+				{
+					this.polynoms.remove(i);
+					linked.remove(i);
+					i = 0;
+					j--;
+				}
 			}
 		}
 	}
@@ -160,15 +169,19 @@ public class Basis
 				if(buff.isZero())
 					this.polynoms.remove(i);
 				else
+				{
 					this.polynoms.set(i, buff);
+				}
 				i--;
 				if(!f && !buff.isZero())
 					f = true;
 			}
 			i++;
-			//System.out.println(i + "/" + this.polynoms.size());
+			System.out.println(i + "/" + this.polynoms.size());
 		} while(i < this.polynoms.size());
 		newLinkList();
+		/*for(i = 0; i < polynoms.size(); i++)
+			this.polynoms.get(i).divideByHighCoef();*/
 		return f;
 	}
 	
@@ -191,11 +204,14 @@ public class Basis
 		boolean f = false, temp;
 		Integer i,j,k;
 		BigPolinom buff;
-		//System.out.println("size : " + this.polynoms.size());
+		System.out.println("size : " + this.polynoms.size());
 		for(i = 0; i < this.polynoms.size(); i++)
 			for(j = 0; j < this.polynoms.size(); j++)
+			//for(j = i+1; j < this.polynoms.size(); j++)
+			//for(j = this.polynoms.size()-1; j > 0; j--)
 			{
 				temp = false;
+				//if(i != j && !this.isLinked(i,j) && triangle(i,j) && !this.polynoms.get(i).getHighMonom().gcd(this.polynoms.get(j).getHighMonom()).isConst())
 				if(i != j && !this.isLinked(i,j) && !this.polynoms.get(i).getHighMonom().gcd(this.polynoms.get(j).getHighMonom()).isConst())
 				{
 					//buff = this.polynoms.get(i).sPolynom2( this.polynoms.get(j) );
@@ -206,11 +222,13 @@ public class Basis
 						addLink(i,j);
 					if(temp)
 					{
+						//if(i != 0) i--;
+						//j = this.polynoms.size();
 						linked.add("");
 					}
 					if(!f)
 						f = temp;
-					//System.out.println("SPoly: " + i + " : " + j + " size:" + this.polynoms.size());
+					System.out.println("SPoly: " + i + " : " + j + " size:" + this.polynoms.size());
 				}
 			}
 		/*for(i = 0; i < this.polynoms.size(); i++)
@@ -249,11 +267,28 @@ public class Basis
 		int i,j;
 		BigMonom buff = ths.getHighMonom();
 		for(i = 0; i < this.polynoms.size(); i++)
-			for(j = 0; j < this.polynoms.size(); j++)
+			for(j = i+1; j < this.polynoms.size(); j++)
 				if(i != j)
 					if(polynoms.get(i).getHighMonom().lcm(polynoms.get(j).getHighMonom()).isDivided(buff) && isLinked(i,j))
 						return true;
 		return false;
+	}
+	
+	private boolean triangle(int ths, int other)
+	{
+		int i;
+		BigMonom buff = this.polynoms.get(ths).getHighMonom().lcm(this.polynoms.get(other).getHighMonom());
+		for(i = 0; i < this.polynoms.size(); i++)
+		{
+			if(i != ths && i != other && this.polynoms.get(i).getHighMonom().isDivided(buff))
+				if(isLinked(i, ths) && isLinked(i, other))
+				{
+					System.out.println("YES");
+					addLink(ths,other);
+					return false;
+				}
+		}
+		return true;
 	}
 	
 	private void newLinkList()
@@ -305,9 +340,9 @@ public class Basis
 	x1^2-x1-x2x3
 	x1x3-x2^2-x2
 	
-	xy-z^2-z
-	x^2-x-yz
-	xz-y^2-y
+xy-z^2-z
+x^2-x-yz
+xz-y^2-y
 
 	3
 	x1x2-x3^2-x3

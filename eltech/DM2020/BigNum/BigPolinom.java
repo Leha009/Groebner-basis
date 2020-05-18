@@ -625,9 +625,10 @@ public class BigPolinom
 			i--;
 			if(f == 0)
 			{
-				buffThis.factors.get(0).setCoef( buffThis.factors.get(0).getCoef().reduce() );
+				/*buffThis.factors.get(0).setCoef( buffThis.factors.get(0).getCoef().reduce() );
 				result.factors.add(buffThis.factors.get(0));
-				buffThis.factors.remove(0);
+				buffThis.factors.remove(0);*/
+				return buffThis;
 			}
 			else
 			{
@@ -688,9 +689,9 @@ public class BigPolinom
 				buffThis = buffThis.subtract(buffOther);
 				buffThis.sort();
 				/*if(!buffThis.isZero())
-					buffThis.simpleMod();*/
+					buffThis.divideByHighCoef();*/
 			}
-			//System.out.print("T");
+			System.out.print("T");
 			//System.out.println("\nbuffThis:" + buffThis);
 		} while(!buffThis.isZero());
 		result.sort();
@@ -764,7 +765,7 @@ public class BigPolinom
 			else
 			{
 				temp.getP().setNumber(temp.getP().getNumber().gcd(this.factors.get(i).getCoef().getP().getNumber()));
-				temp.getQ().setNumber(temp.getQ().getNumber().gcd(this.factors.get(i).getCoef().getQ().getNumber()));
+				temp.getQ().setNumber(temp.getQ().getNumber().lcm(this.factors.get(i).getCoef().getQ().getNumber()));
 				temp = temp.reduce();
 			}
 		}
