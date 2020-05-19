@@ -14,3 +14,5 @@ $ java Test
 Если у вас не установлена java, то предлагаю установить:
 https://jdk.java.net/14/
 Скачайте zip архив, разорхивируйте его, и укажите путь к папке bin в переменную среды (в Windows - это %path%)
+
+Версия с портированной java, ничего ставить не нужно: https://drive.google.com/open?id=1tlMDAwfBlo8y-hBYiKcr1Amb_4a9-ruI
