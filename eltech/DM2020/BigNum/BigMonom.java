@@ -11,6 +11,7 @@ public class BigMonom
 {
 	private BigQ coef;												//коэффициент
 	private ArrayList<Integer> powers = new ArrayList<Integer>();	//степени x_i
+	private int mode;												//режим сортировки
 	
 	private BigMonom() {}
 	
@@ -29,8 +30,9 @@ public class BigMonom
 	* @version 1
 	* @author 
 	*/
-	public BigMonom(int amount, String src) throws IllegalArgumentException
+	public BigMonom(int amount, String src, int curMode) throws IllegalArgumentException
 	{
+		mode = curMode;
 		int i, power, index;
 		String[] str;
 		for(i = 0; i < amount; i++)
@@ -124,6 +126,7 @@ public class BigMonom
 		BigMonom result = new BigMonom();
 		result.coef = this.coef.clone();
 		result.powers = new ArrayList<Integer>(this.powers);
+		result.mode = this.mode;
 		return result;
 	}
 	
@@ -137,6 +140,13 @@ public class BigMonom
 	*/
 	public int compareTo(BigMonom other)
 	{
+		if(mode == 0)
+			return this.compTo(other);
+		return this.compTo2(other);
+	}
+	
+	public int compTo(BigMonom other)
+	{
 		int i;
 		if(this.isZero())
 			if(other.isZero())
@@ -146,6 +156,24 @@ public class BigMonom
 		else if(other.isZero())
 			return 1;
 		for(i = 0; i < this.powers.size(); i++)
+			if(this.powers.get(i) > other.powers.get(i))
+				return 1;
+			else if(this.powers.get(i) < other.powers.get(i))
+				return -1;
+		return 0;
+	}
+	
+	public int compTo2(BigMonom other)	//z > y > x
+	{
+		int i;
+		if(this.isZero())
+			if(other.isZero())
+				return 0;
+			else
+				return -1;
+		else if(other.isZero())
+			return 1;
+		for(i = this.powers.size()-1; i >= 0; i--)
 			if(this.powers.get(i) > other.powers.get(i))
 				return 1;
 			else if(this.powers.get(i) < other.powers.get(i))
@@ -277,7 +305,7 @@ public class BigMonom
 		BigMonom buffThis = this.clone();
         BigMonom buffOther = other.clone();
 		BigMonom buff;
-		BigMonom result = new BigMonom(this.powers.size(), "1");
+		BigMonom result = new BigMonom(this.powers.size(), "1", mode);
 		if(buffThis.isLessThan(buffOther))
 		{
 			buff = buffOther;
@@ -297,9 +325,10 @@ public class BigMonom
 		int i;
 		BigMonom buffThis = this.clone();
 		BigMonom buffOther = other.clone();
-		BigMonom result = new BigMonom(this.powers.size(), "1");
+		BigMonom result = new BigMonom(this.powers.size(), "1", mode);
 		for(i = 0; i < this.powers.size(); i++)
 			result.powers.set(i, Math.max(this.powers.get(i), other.powers.get(i)));
+		//result.setCoef(buffThis.getCoef().lcm(buffOther.getCoef()));
 		return result;
 	}
 	
@@ -360,5 +389,15 @@ public class BigMonom
 	public void setCoef(BigQ num)
 	{
 		coef = num;
+	}
+	
+	public void setMode(int curMode)
+	{
+		mode = curMode;
+	}
+	
+	public int getMode()
+	{
+		return mode;
 	}
 }

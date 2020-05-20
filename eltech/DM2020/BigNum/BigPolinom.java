@@ -1,6 +1,7 @@
 package eltech.DM2020.BigNum;
 
 import java.util.*;
+import java.util.concurrent.TimeUnit;	//для отсчитывания секунд
 
 /**
 * Класс, который позволяет манипулировать с полиномами с рациональными коэффициентами
@@ -9,6 +10,7 @@ import java.util.*;
 public class BigPolinom
 {
 	private ArrayList<BigMonom> factors = new ArrayList<BigMonom>();
+	private int mode;															//режим сортировки: 0 - лексический, 1 - обратный лексический
 
 	private BigPolinom() {}
 
@@ -23,8 +25,9 @@ public class BigPolinom
 	* @version 1
 	* @author 
 	*/
-	public BigPolinom(int amount, String src)
+	public BigPolinom(int amount, String src, int curMode)
 	{
+		mode = curMode;
 		int i;
 		String[] str;
 		if(src == null)
@@ -44,9 +47,34 @@ public class BigPolinom
 		str = src.split("[+]");
 		for(i = 0; i < str.length; i++)
 		{
-			factors.add(new BigMonom(amount, str[i].trim()));
+			factors.add(new BigMonom(amount, str[i].trim(), mode));
 		}
 		this.sort();
+	}
+	
+	public BigPolinom(int amount, String src)		//для констант
+	{	
+		int i;
+		String[] str;
+		if(src == null)
+			throw new IllegalArgumentException("Неверный аргумент: строка не может быть не инициализированной\n");
+		if(src.equals(""))
+			throw new IllegalArgumentException("Неверный аргумент: строка не может быть пустой\n");
+		src = src.trim();
+		src = src.replace("*", "");
+		src = src.replace(")", "");
+		src = src.replace("(", "");
+		src = src.replace("-", "+-");
+		src = src.replace("++", "+");
+		src = src.replace("/+", "/");
+		src = src.replace("_", "");
+		if(src.indexOf("+") == 0)
+			src = src.substring(1,src.length());
+		str = src.split("[+]");
+		for(i = 0; i < str.length; i++)
+		{
+			factors.add(new BigMonom(amount, str[i].trim(),mode));
+		}
 	}
 
 	/**
@@ -98,6 +126,8 @@ public class BigPolinom
     {
 		if(this.isZero() || other.isZero())
 			return this.factors.size() >= other.factors.size() ? (this.factors.size() == other.factors.size() ?  0 : 1 ) : -1 ;
+		/*if(mode != 0)
+			return this.factors.get(0).compareTo2( other.factors.get(0) );*/
 		return this.factors.get(0).compareTo( other.factors.get(0) );
     }
 
@@ -149,6 +179,7 @@ public class BigPolinom
 		n = this.factors.size();
 		for(i = 0; i < n; i++)
 			result.factors.add(this.factors.get(i).clone());
+		result.mode = this.mode;
 		return result;
 	}
 
@@ -156,6 +187,7 @@ public class BigPolinom
     * Сложение полиномов
 	*
 	* @param BigPolinom other - второй полином, который прибавляется
+	* @param int mode - режим сортировки: 1 - обратный лексический, 0 - лексический
 	*
     * @return BigPolinom result - результат сложения
     *
@@ -218,11 +250,11 @@ public class BigPolinom
 			{
 				resultCoef = result.factors.get(index).getCoef();
 				otherCoef = buffOther.factors.get(i).getCoef();
-				result.factors.get(index).setCoef( resultCoef.subtract(otherCoef).reduce() );
+				result.factors.get(index).setCoef( resultCoef.subtract(otherCoef) );
 			}
 			else
 			{
-				buffOther.factors.get(i).setCoef( buffOther.factors.get(i).getCoef().multiply(minusOne).reduce());
+				buffOther.factors.get(i).setCoef( buffOther.factors.get(i).getCoef().multiply(minusOne));
 				result.factors.add( buffOther.factors.get(i) );
 			}
 		}
@@ -263,7 +295,7 @@ public class BigPolinom
 				{
 					resultCoef = result.factors.get(index).getCoef();
 					otherCoef = buffThis.factors.get(0).getCoef();
-					result.factors.get(index).setCoef( resultCoef.add(otherCoef).reduce() );
+					result.factors.get(index).setCoef( resultCoef.add(otherCoef) );
 				}
 				else
 				{
@@ -308,7 +340,7 @@ public class BigPolinom
 				result.factors.add( buffThis.factors.get(0) );
 			}
 		}
-		result.sort();
+		result.sort2();
         return result;
 	}*/
 	
@@ -372,7 +404,7 @@ public class BigPolinom
 			/*if(!buffThis.isZero())	//убрать?
 				buffThis.divideByHighCoef();*/
 		}
-		//result.sort();
+		//result.sort2();
 		return new Case(result, buffThis);		//Частное, остаток
 	}
 	
@@ -420,7 +452,7 @@ public class BigPolinom
 		BigPolinom buffThis = this.clone();
         BigPolinom buffOther = other.clone();
 		BigPolinom result = buffOther;
-		BigPolinom one = new BigPolinom(this.factors.get(0).getPowers().size(), "1");
+		BigPolinom one = new BigPolinom(this.factors.get(0).getPowers().size(), "1", mode);
 		if(buffOther.isMoreThan(buffThis))
 		{
 			result = buffOther;
@@ -510,13 +542,11 @@ public class BigPolinom
 	
 	/**
     * Сортировка полинома
-	*
-    * @return Отсортированный полином
     *
     * @version 1
     * @author 
     */
-	private void sort()
+	public void sort()
 	{
 		int i;
 		BigPolinom buffThis = this.clone();
@@ -601,9 +631,9 @@ public class BigPolinom
 		BigPolinom result;
 		BigPolinom buffThis = this.clone();
 		BigPolinom buffOther = other.clone();
-		BigPolinom GCD = this.getHighMonom().gcd(other.getHighMonom()).toBigPolinom();
-		buffThis = buffThis.multiply(other.getHighMonom().toBigPolinom().divide(GCD));
-		buffOther = buffOther.multiply( this.getHighMonom().toBigPolinom().divide(GCD) );
+		BigPolinom LCM = this.getHighMonom().lcm(other.getHighMonom()).toBigPolinom();
+		buffThis = buffThis.multiply(LCM).divide(this.getHighMonom().toBigPolinom());
+		buffOther = buffOther.multiply(LCM).divide(other.getHighMonom().toBigPolinom());
 		result = buffThis.subtract(buffOther);
 		return result;
 	}
@@ -612,7 +642,7 @@ public class BigPolinom
 	{
 		int i = 0, f = 0;
 		BigPolinom buffThis = this.clone();
-		BigPolinom result = new BigPolinom(buffThis.factors.get(0).getPowers().size(), "0");
+		BigPolinom result = new BigPolinom(buffThis.factors.get(0).getPowers().size(), "0", mode);
 		BigPolinom divider;
 		do
 		{
@@ -660,15 +690,21 @@ public class BigPolinom
     * @version 1
     * @author 
     */
-	public BigPolinom reduce2(ArrayList<BigPolinom> basis)
+	public BigPolinom reduce2(ArrayList<BigPolinom> basis, long startTime, boolean changed)
 	{
 		int i, f;
 		BigPolinom buffThis = this.clone();
-		BigPolinom result = new BigPolinom(buffThis.factors.get(0).getPowers().size(), "0");
+		BigPolinom result = new BigPolinom(buffThis.factors.get(0).getPowers().size(), "0", mode);
 		BigMonom multiplier;
 		BigPolinom buffOther;						//Полином, старший член которого делится на старший член buffThis
 		do
 		{
+			if(!changed)
+			{
+				long time = TimeUnit.SECONDS.convert(System.nanoTime()-startTime, TimeUnit.NANOSECONDS);
+				if(time > 60)
+					return buffThis;
+			}
 			for(i = 0, f = 0; i < basis.size() && f == 0; i++)
 			{
 				if(!buffThis.equals2(basis.get(i)))
@@ -689,24 +725,23 @@ public class BigPolinom
 				buffThis = buffThis.subtract(buffOther);
 				buffThis.sort();
 				/*if(!buffThis.isZero())
-					buffThis.divideByHighCoef();*/
+					buffThis.gcdAndLcm();*/
 			}
-			System.out.print("T");
+			//System.out.print("T");
 			//System.out.println("\nbuffThis:" + buffThis);
 		} while(!buffThis.isZero());
 		result.sort();
-		/*if(!result.isZero())
-			result.gcdRational();*/
+		//result.gcdRational();
 		return result;
 	}
 	
-	public boolean reduce(ArrayList<BigPolinom> basis)
+	public boolean reduce(ArrayList<BigPolinom> basis, long startTime, boolean changed)
 	{
 		int i,f = 0;
 		if(this.isZero())
 			return false;
 		BigPolinom reduced;
-		reduced = this.reduce2(basis);	//reduce2 вернуть
+		reduced = this.reduce2(basis, startTime, changed);	//reduce2 вернуть
 		//System.out.println(reduced);
 		if(!reduced.isZero())
 			for(i = 0; i < basis.size() && f == 0; i++)
@@ -722,81 +757,15 @@ public class BigPolinom
 		return true;
 	}
 	
-	public boolean reduceBasis(ArrayList<BigPolinom> basis)
-	{
-		int i,f = 0;
-		if(this.isZero())
-			return false;
-		//System.out.println(reduced);
-		for(i = 0; i < basis.size() && f == 0; i++)
-			if(basis.get(i).equals2(this))
-				f++;
-		if(f == 0)
-			basis.add(this);
-		else
-			return false;
-		return true;
-	}
-	
 	public void divideByHighCoef()
 	{
 		int i;
 		BigQ highCoef = this.factors.get(0).getCoef();
 		for (i = 0; i < factors.size(); i++)
 		{
-			this.factors.get(i).setCoef(this.factors.get(i).getCoef().divide(highCoef).reduce());
+			this.factors.get(i).setCoef(this.factors.get(i).getCoef().divide(highCoef));
 		}
 		//this.simpleMod();	//убрать?
-	}
-	
-	public void gcdRational()
-	{
-		int i;
-		BigQ temp = new BigQ("1/1");
-		BigQ temp2;
-		BigQ minusOne = new BigQ("-1/1");
-		for (i = 0; i < factors.size(); i++)
-		{
-			if(temp.isZero() && !this.factors.get(i).isZero())
-			{
-				temp.getP().setNumber(this.factors.get(i).getCoef().getP().getNumber());
-				temp.getQ().setNumber(this.factors.get(i).getCoef().getQ().getNumber());
-			}
-			else
-			{
-				temp.getP().setNumber(temp.getP().getNumber().gcd(this.factors.get(i).getCoef().getP().getNumber()));
-				temp.getQ().setNumber(temp.getQ().getNumber().lcm(this.factors.get(i).getCoef().getQ().getNumber()));
-				temp = temp.reduce();
-			}
-		}
-		for (i = 0; i < factors.size(); i++)
-		{
-			temp2 = this.factors.get(i).getCoef().divide(temp).reduce();
-			this.factors.get(i).setCoef(temp2.reduce());
-		}
-	}
-	
-	public void simpleMod()
-	{
-		//BigQ simple = new BigQ("950077708875374368239634443053301088702579244657195230918021/1");
-		//BigQ simple = new BigQ("38415949717841326076959565850785329844539400959763");
-		//BigQ simple = new BigQ("226471897688985511301516652421");
-		//BigQ simple = new BigQ("16629719218137968867");
-		BigQ simple = new BigQ("9478237");
-		int i;
-		for(i = 0; i < factors.size(); i++)
-		{
-			this.factors.get(i).setCoef( this.factors.get(i).getCoef().mod(simple));
-		}
-	}
-	
-	private void reduceCoefs()
-	{
-		int i;
-		//gcdAndLcm();
-		for(i = 0; i < this.factors.size(); i++)
-			this.factors.get(i).setCoef( this.factors.get(i).getCoef().reduce() );
-		//this.simpleMod();
 	}
 	
 	public boolean onlyOne()
@@ -824,5 +793,13 @@ public class BigPolinom
 	public ArrayList<BigMonom> getFactors()
 	{
 		return factors;
+	}
+	
+	public void setMode(int curMode)
+	{
+		mode = curMode;
+		int i;
+		for(i = 0; i < this.factors.size(); i++)
+			this.factors.get(i).setMode(mode);
 	}
 }

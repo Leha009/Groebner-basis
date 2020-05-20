@@ -20,10 +20,9 @@ public class Colloquium
 		System.out.println("Для ознакомления с программой введите \"?\" или \"help\"");
 		Interface();
 		
-		/*BigPolinom test = new BigPolinom(3, "-379184395505189595953/2007878116973328684*x2*x3^4 - 116148539251300772714/501969529243332171*x2*x3^3 - 271120228478818833391/2007878116973328684*x2*x3^2 - 29*x2*x3 - 159665/104411*x3^17 - 56124369097423/6410174269548*x3^16 - 20022098482313825789/2007878116973328684*x3^15 + 3347249/104411*x3^14 + 85531629101083/3205087134774*x3^13 + 38683887067578168928/501969529243332171*x3^12 + 15734783117727584653/669292705657776228*x3^11 - 63148301252300456741/334646352828888114*x3^10 - 166993230441965617421/669292705657776228*x3^9 - 69299120396104279147/334646352828888114*x3^8 + 51391695579123955487/669292705657776228*x3^7 + 463332964317368474473/1003939058486664342*x3^6 + 85474025902389390929/167323176414444057*x3^5 + 174434264177173975469/669292705657776228*x3^4 + 10462338910884304341/111548784276296038*x3^3 + 6292227882697869467/143419865498094906*x3^2");
-		System.out.println(test);
-		test.divideByHighCoef();
-		System.out.println(test);*/
+		/*BigPolinom test = new BigPolinom(3, "x1x2", 1);
+		BigPolinom test2 = new BigPolinom(3, "x2x1", 1);
+		System.out.println(test.divide(test2));*/
 	}
 	
 	private static void Interface()
@@ -67,7 +66,10 @@ public class Colloquium
 					{
 						if(inputed != 0)
 						{
-							formBasis();
+							if(formed == 0)
+								formBasis();
+							else
+								System.out.println("Базис уже составлен! Введите outb, чтобы посмотреть его");
 							formed = 1;
 						}
 						else
@@ -115,7 +117,8 @@ public class Colloquium
 			}
 			catch(Throwable t)
 			{
-				System.out.println("Упс... Произошла неизвестная ошибка!");
+				//System.out.println("Упс... Произошла неизвестная ошибка!");
+				System.out.println(t);
 			}
 		}
 	}
@@ -139,20 +142,25 @@ public class Colloquium
 		Scanner num = new Scanner(System.in);
 		String buffS;
 		int amount = 0;
-		System.out.print("Введите количество неизвестных: ");
+		int curMode = 0;
+		System.out.println("Введите количество неизвестных и режим сортировки через пробел\n0 - лексический режим сортивки x1 > x2 > x3, 1 - обратный лексический x3 > x2 > x1");
 		try
 		{
 			do
 			{
+				System.out.print("> ");
 				amount = num.nextInt();
-			} while(amount < 1);
+				curMode = num.nextInt();
+			} while(amount < 1 || curMode < 0 || curMode > 1);
 			System.out.println("Ввод многочленов имеет следующий вид: каждая переменная должна содержать индекс после себя, например, 45x1 + 7/5x2^7");
-			base.clearBasis();
+			base.clearAll();
 			base.setMaxPower(amount);
+			base.setMode(curMode);
 			if(amount < 4)
 			{
 				Scanner num2 = new Scanner(System.in);
 				System.out.println("\nВведите любое число, отличное от нуля, чтобы использовать следующий вид переменных: x y z");
+				System.out.print("> ");
 				mode = num2.nextInt();
 			}
 			else
@@ -203,6 +211,6 @@ public class Colloquium
 	
 	private static void dicision()
 	{
-			base.outputDecision();
+		base.outputDecision(mode);
 	}
 }

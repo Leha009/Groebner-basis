@@ -342,8 +342,7 @@ public class BigQ
 		BigQ result = new BigQ();
 		result.q = this.q.multiply(other.q);
 		result.p = ( this.p.multiply(other.q) ).subtract(other.p.multiply(this.q));
-		result.reduce();
-		return result;
+		return result.reduce();
 	}
 
 	/**
@@ -363,8 +362,7 @@ public class BigQ
 
 		result.q = this.q.multiply(other.p);
 		result.p = this.p.multiply(other.q);
-		result.reduce();
-		return result;
+		return result.reduce();
 	}
 	
 	/**
@@ -387,8 +385,7 @@ public class BigQ
 		
 		while(result.compareTo(buffOther) > 0)
 			result = result.subtract(buffOther);
-		result.reduce();
-		return result;
+		return result.reduce();
 	}
 	
 	public BigZ getP()
