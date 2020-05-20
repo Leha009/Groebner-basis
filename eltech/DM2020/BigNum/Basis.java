@@ -58,6 +58,7 @@ public class Basis
 		changed = false;
 		clearBasis();
 		Buhberger();
+		removeDivided();
 	}
 	
 	public void outputBase(int type)
@@ -115,12 +116,12 @@ public class Basis
 		time = 0;
 		int i;
 		newLinkList();
-		boolean f = true;
+		boolean f = false;
 		if(polynoms.size() < 3)// basePolynoms.size())
 			sPolynom();
 		if(!changed)
 		{
-			while(f)
+			do
 			{
 				while(sPolynom2())
 				while(simple3())
@@ -128,7 +129,7 @@ public class Basis
 				time = TimeUnit.SECONDS.convert(System.nanoTime()-start, TimeUnit.NANOSECONDS);
 				if(time > LIMIT)
 					f = false;
-			}
+			} while(f);
 			if(time > LIMIT)
 			{
 				System.out.println("Изменен режим сортировки, базис примет более приятный вид после просчета");
@@ -154,6 +155,24 @@ public class Basis
 				f = sPolynom2();
 			}
 			removeEquals();
+		}
+	}
+	
+	private void removeDivided()
+	{
+		int i,j;
+		for(i = 0; i < this.polynoms.size(); i++)
+		{
+			for(j = i+1; j < this.polynoms.size(); j++)
+			{
+				if(this.polynoms.get(i).getHighMonom().isDivided(this.polynoms.get(j).getHighMonom()))
+				{
+					this.polynoms.remove(i);
+					linked.remove(i);
+					i = 0;
+					j--;
+				}
+			}
 		}
 	}
 	
@@ -231,8 +250,6 @@ public class Basis
 		//System.out.println("size : " + this.polynoms.size());
 		for(i = 0; i < this.polynoms.size(); i++)
 			for(j = 0; j < this.polynoms.size(); j++)
-			//for(j = i+1; j < this.polynoms.size(); j++)
-			//for(j = this.polynoms.size()-1; j > 0; j--)
 			{
 				if(!changed)
 				{
@@ -251,26 +268,13 @@ public class Basis
 					if(!this.isLinked(i,j))
 						addLink(i,j);
 					if(temp)
-					{
-						//addLink(j,i);
-						//this.polynoms.add(this.polynoms.get(this.polynoms.size()-1).multiplyByMinusOne());
-						//if(i != 0) i--;
-						//j = this.polynoms.size();
 						linked.add("");
-						//while(simple3());		//сильно ускоряет одно, сильно тормозит другое
-						//i = 0; j = -1;
-					}
 					if(!f)
 						f = temp;
 					//System.out.println("SPoly: " + i + " : " + j + " size:" + this.polynoms.size());
 				}
 			}
-		/*for(i = 0; i < this.polynoms.size(); i++)
-		{
-			buff = this.polynoms.get(i);
-			buff.divideByHighCoef();
-			this.polynoms.set(i, buff);
-		}*/
+		//System.out.println("POLY " + f);
 		return f;
 	}
 	
@@ -335,27 +339,79 @@ public class Basis
 	
 	public void decision()
 	{
+		int i = 0;
 		BigPolinom buf;
-		BigPolinom end = new BigPolinom(this.polynoms.get(0).getFactors().get(0).getPowers().size(), "0", mode);
-		for(int i=0; i < this.basePolynoms.size(); i++)
-		{
+		BigPolinom end = new BigPolinom(this.polynoms.get(0).getFactors().get(0).getPowers().size(), "0");
+		BigPolinom tmp = new BigPolinom(this.polynoms.get(0).getFactors().get(0).getPowers().size(), "0");
+		BigPolinom reset = new BigPolinom(this.polynoms.get(0).getFactors().get(0).getPowers().size(), "0");
+		int k = 1;
+		//System.out.println(this.basePolynoms.size() + ":"+ i);
+		do {
+			//System.out.println(this.basePolynoms.size() + ":"+ i);
+			k = 1;
 			buf = this.basePolynoms.get(i);
-			for(int j=0; j < this.polynoms.size(); j++)
-			{
-				if (!buf.divide(this.polynoms.get(j)).isZero())
-				{
-					if(buf.mod(this.polynoms.get(j)).isZero())
-					{
-						break;
+			//System.out.println("Само уравнение");
+			//System.out.println(buf);
+			while (k == 1) {
+				//System.out.println("Пока");
+				for (int j = 0; j < this.polynoms.size(); j++) {
+					//System.out.println("Вошли в цикл");
+					if (!buf.divide(this.polynoms.get(j)).isZero()) {
+						//System.out.println("Делится");
+						if (buf.mod(this.polynoms.get(j)).isZero()) {
+							//System.out.println("Нулевой остаток");
+						}
+						else {
+							buf = buf.mod(this.polynoms.get(j));
+							//System.out.println("Поделили");
+							j = 0;
+						}
 					}
-					buf=buf.mod(this.polynoms.get(j));
+					//System.out.println("Внутри цикла");
+					//System.out.println(buf);
 				}
+				//System.out.println("Что должны добавить");
+				//System.out.println(buf);
+				if (buf.onlyOne()) {
+					k = 0;
+					//System.out.println("Содержит только одну переменную");
+					tmp = end.add(buf.getHighMonom().toBigPolinom());
+					if(tmp.onlyOne()) {
+						end = end.add(buf);
+					}
+					else{
+						end = reset;
+						k = 0;
+					}
+				}
+				else {
+					if(buf.getHighMonom().toBigPolinom().onlyOne()) {
+						tmp = end.add(buf.getHighMonom().toBigPolinom());
+						if(tmp.onlyOne()) {
+							end = end.add(buf.getHighMonom().toBigPolinom());
+							//System.out.println("Добавили только старший член");
+							//System.out.println(end);
+							buf = buf.add(buf.getHighMonom().toBigPolinom().multiplyByMinusOne());
+							//System.out.println("Отняли старший член");
+							//System.out.println(buf);
+						}
+						else{
+							end = reset;
+							k = 0;
+						}
+						tmp = reset;
+					}
+					else{
+						end = reset;
+						k = 0;
+					}
+				}
+				//System.out.println("Конец");
+				//System.out.println(end);
 			}
-			if(buf.onlyOne()) {
-				end = end.add(buf);
-			}
-			decision = end.clone();
-		}
+			i++;
+		}while((end.toString() == "0") && (i < this.basePolynoms.size()));
+		decision = end.clone();
 	}
 	
 	public void outputDecision(int type)
@@ -371,6 +427,32 @@ public class Basis
 			buffS = buffS.replace("x3", "z");
 		}
 		System.out.println(buffS + "\n");
+	}
+	
+	public void clearDec()
+	{
+		decision = null;
+	}
+	
+	private boolean clearPowers()
+	{
+		int i, power;
+		power = this.polynoms.get(0).getHighMonom().getPowers().size();
+		ArrayList<Integer> powers = new ArrayList<Integer>();
+		for(i = 0; i < power; i++)
+			powers.add(0);
+		for(i = 0; i < this.polynoms.size(); i++)
+		{
+			power = this.polynoms.get(i).getHighMonom().clearPower();
+			if(power != -1)
+				powers.set(power, 1);
+		}
+		for(i = 0; i < powers.size(); i++)
+		{
+			if(powers.get(i) == 0)
+				return false;
+		}
+		return true;
 	}
 }
 

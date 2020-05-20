@@ -371,6 +371,24 @@ public class BigMonom
 		return s1 >= s2 ? 1 : s1 == s2 ? 0 : -1;
 	}
 	
+	public int clearPower()
+	{
+		int i,power = -1;
+		{
+			for(i = 0; i < this.powers.size(); i++)
+			{
+				if(this.powers.get(i) > 0)
+				{
+					if(power == -1)
+						power = i;
+					else
+						return -1;
+				}
+			}
+		}
+		return power;
+	}
+	
 	public ArrayList<Integer> getPowers()
 	{
 		return powers;

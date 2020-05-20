@@ -20,9 +20,10 @@ public class Colloquium
 		System.out.println("Для ознакомления с программой введите \"?\" или \"help\"");
 		Interface();
 		
-		/*BigPolinom test = new BigPolinom(3, "x1x2", 1);
-		BigPolinom test2 = new BigPolinom(3, "x2x1", 1);
-		System.out.println(test.divide(test2));*/
+		/*BigPolinom test = new BigPolinom(3, "x1x2 + x1^2", 1);
+		BigPolinom test2 = new BigPolinom(3, "x2x1 + x1", 1);
+		System.out.println(test.divide(test2));
+		System.out.println(test.mod(test2));*/
 	}
 	
 	private static void Interface()
@@ -204,6 +205,7 @@ public class Colloquium
 	
 	private static void formBasis()
 	{
+		base.clearDec();
 		System.out.println("Базис формируется...");
 		base.doActions();
 		System.out.println("Формирование базиса прошло успешно! Для вывода введите outbasis(или outb)");
