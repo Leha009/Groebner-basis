@@ -123,8 +123,10 @@ public class Basis
 		{
 			do
 			{
-				while(sPolynom2())
-				while(simple3())
+				while(sPolynom2());
+				//output(1);
+				while(simple3());
+				//output(1);
 				f = sPolynom2();
 				time = TimeUnit.SECONDS.convert(System.nanoTime()-start, TimeUnit.NANOSECONDS);
 				if(time > LIMIT)
@@ -134,27 +136,20 @@ public class Basis
 			{
 				System.out.println("Изменен режим сортировки, базис примет более приятный вид после просчета");
 				mode = mode^1;
-				while(this.polynoms.size() > 0)
-					this.polynoms.remove(0);
-				for(i = 0; i < this.basePolynoms.size(); i++)
-				{
-					this.basePolynoms.get(i).setMode(mode);
-					this.basePolynoms.get(i).sort();
-					this.polynoms.add(this.basePolynoms.get(i).clone());
-				}
+				clearBasis();
 				changed = true;
 				Buhberger();
 			}
 		}
 		else
 		{
-			while(f)
+			do
 			{
 				while(sPolynom2());
 				while(simple3());
 				f = sPolynom2();
-			}
-			removeEquals();
+			} while(f);
+			//removeEquals();
 		}
 	}
 	
@@ -167,6 +162,7 @@ public class Basis
 			{
 				if(this.polynoms.get(i).getHighMonom().isDivided(this.polynoms.get(j).getHighMonom()))
 				{
+					//System.out.println("This " + this.polynoms.get(i) + "\nOther " + this.polynoms.get(j));
 					this.polynoms.remove(i);
 					linked.remove(i);
 					i = 0;
@@ -258,8 +254,9 @@ public class Basis
 						return false;
 				}
 				temp = false;
-				//if(i != j && !this.isLinked(i,j) && !this.polynoms.get(i).getHighMonom().gcd(this.polynoms.get(j).getHighMonom()).isConst() && triangle(i,j))
-				if(i != j && !this.isLinked(i,j) && !this.polynoms.get(i).getHighMonom().gcd(this.polynoms.get(j).getHighMonom()).isConst())
+				//if(i != j && !this.isLinked(i,j) && !this.polynoms.get(i).getHighMonom().gcd(this.polynoms.get(j).getHighMonom()).isConst() && triangle(i,j))		Критерии не работают!! Только хуже!
+				//if(i != j && !this.isLinked(i,j) && !this.polynoms.get(i).getHighMonom().gcd(this.polynoms.get(j).getHighMonom()).isConst())
+				if(i != j && !this.isLinked(i,j))
 				{
 					//buff = this.polynoms.get(i).sPolynom2( this.polynoms.get(j) );
 					buff = this.polynoms.get(i).sPolynom( this.polynoms.get(j) );

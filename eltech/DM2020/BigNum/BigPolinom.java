@@ -638,7 +638,7 @@ public class BigPolinom
 		return result;
 	}
 	
-	public BigPolinom reduce22(ArrayList<BigPolinom> basis)	//основано на делителе
+	public BigPolinom reduce22(ArrayList<BigPolinom> basis, long startTime, boolean changed)	//основано на делителе
 	{
 		int i = 0, f = 0;
 		BigPolinom buffThis = this.clone();
@@ -646,6 +646,12 @@ public class BigPolinom
 		BigPolinom divider;
 		do
 		{
+			if(!changed)
+			{
+				long time = TimeUnit.SECONDS.convert(System.nanoTime()-startTime, TimeUnit.NANOSECONDS);
+				if(time > 60)
+					return buffThis;
+			}
 			for(i = 0, f = 0; i < basis.size() && f == 0; i++)
 			{
 				if(!buffThis.equals2(basis.get(i)) && !basis.get(i).isZero())
@@ -732,6 +738,7 @@ public class BigPolinom
 		} while(!buffThis.isZero());
 		result.sort();
 		//result.gcdRational();
+		//System.out.println("\nRES:" + result);
 		return result;
 	}
 	

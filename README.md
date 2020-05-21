@@ -9,4 +9,4 @@ Groebner-basis
 
 Если у вас не установлена java, то предлагаю установить: https://jdk.java.net/14/ Скачайте zip архив, разорхивируйте его, и укажите путь к папке bin в переменную среды (в Windows - это %path%)
 
-Версия с портированной java, ничего ставить не нужно: https://drive.google.com/file/d/1kC0KDUtDjIquU6M_fbC93dT4Im5KWFkA/view?usp=sharing
+Версия с портированной java, ничего ставить не нужно: https://drive.google.com/file/d/1By1wZslhjbgsKfp_NGdmzASVskVlnMP0/view?usp=sharing
