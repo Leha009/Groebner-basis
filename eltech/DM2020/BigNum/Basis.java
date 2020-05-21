@@ -127,7 +127,7 @@ public class Basis
 				//output(1);
 				while(simple3());
 				//output(1);
-				f = sPolynom2();
+				f = sPolynom3();
 				time = TimeUnit.SECONDS.convert(System.nanoTime()-start, TimeUnit.NANOSECONDS);
 				if(time > LIMIT)
 					f = false;
@@ -239,6 +239,43 @@ public class Basis
 	}
 	
 	private boolean sPolynom2()
+	{
+		boolean f = false, temp;
+		Integer i,j,k;
+		BigPolinom buff;
+		//System.out.println("size : " + this.polynoms.size());
+		for(i = 0; i < this.polynoms.size(); i++)
+			for(j = 0; j < this.polynoms.size(); j++)
+			{
+				if(!changed)
+				{
+					time = TimeUnit.SECONDS.convert(System.nanoTime()-start, TimeUnit.NANOSECONDS);
+					if(time > LIMIT)
+						return false;
+				}
+				temp = false;
+				//if(i != j && !this.isLinked(i,j) && !this.polynoms.get(i).getHighMonom().gcd(this.polynoms.get(j).getHighMonom()).isConst() && triangle(i,j))		Критерии не работают!! Только хуже!
+				if(i != j && !this.isLinked(i,j) && !this.polynoms.get(i).getHighMonom().gcd(this.polynoms.get(j).getHighMonom()).isConst())
+				//if(i != j && !this.isLinked(i,j))
+				{
+					//buff = this.polynoms.get(i).sPolynom2( this.polynoms.get(j) );
+					buff = this.polynoms.get(i).sPolynom( this.polynoms.get(j) );
+					if(!buff.isZero() && !isReducedToZero(buff))
+						temp = buff.reduce(this.polynoms, start, changed);
+					if(!this.isLinked(i,j))
+						addLink(i,j);
+					if(temp)
+						linked.add("");
+					if(!f)
+						f = temp;
+					//System.out.println("SPoly: " + i + " : " + j + " size:" + this.polynoms.size());
+				}
+			}
+		//System.out.println("POLY " + f);
+		return f;
+	}
+	
+	private boolean sPolynom3()
 	{
 		boolean f = false, temp;
 		Integer i,j,k;
