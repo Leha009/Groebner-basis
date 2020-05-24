@@ -10,12 +10,18 @@ public class Basis
 	private ArrayList<String> linked = new ArrayList<String>();	//Записываем номера тех многочленов, с которыми уже строили S полином
 	private int maxpower;														//Кол-во неизвестных
 	private BigPolinom decision;
-	private int mode;															//режим сортировки: 0 - лексический, 1 - обратный лексический
+	private ArrayList<Integer> mode;											//режим сортировки
 	private boolean changed;													//Была ли смена сортировки
 	private long time;															//Потраченное время
 	private long start;															//Время начала
 	private static final int LIMIT = 60;										//Предел рассчета
 	
+	/**
+    * Очистка базиса и исходной системы
+    *
+    * @version 1
+    * @author 
+    */
 	public void clearAll()
 	{
 		while(basePolynoms.size() > 0)
@@ -24,6 +30,12 @@ public class Basis
 			polynoms.remove(0);
 	}
 	
+	/**
+    * Очистка базиса
+    *
+    * @version 1
+    * @author 
+    */
 	private void clearBasis()
 	{
 		int i;
@@ -31,36 +43,63 @@ public class Basis
 			this.polynoms.remove(0);
 		for(i = 0; i < this.basePolynoms.size(); i++)
 		{
-			this.basePolynoms.get(i).setMode(mode);
 			this.basePolynoms.get(i).sort();
 			this.polynoms.add(this.basePolynoms.get(i).clone());
 		}
 	}
 	
+	/**
+    * Добавление полинома в исходную систему полиномов
+	*
+	* @param String newPolynom - Новый полином для добавления
+    *
+    * @version 1
+    * @author 
+    */
 	public void addBasis(String newPolynom)
 	{
-		polynoms.add( new BigPolinom(maxpower, newPolynom, mode) );
-		basePolynoms.add( new BigPolinom(maxpower, newPolynom, mode) );
+		//polynoms.add( new BigPolinom(maxpower, newPolynom) );
+		basePolynoms.add( new BigPolinom(maxpower, newPolynom) );
 	}
 	
+	/**
+    * Установление максимального количества неизвестных в системе
+    *
+	* @param int power - кол-во неизвестных
+	*
+    * @version 1
+    * @author 
+    */
 	public void setMaxPower(int power)
 	{
 		maxpower = power;
 	}
 	
-	public void setMode(int curMode)
-	{
-		mode = curMode;
-	}
-	
+	/**
+    * Запуск алгоритма Бухбергера
+    *
+    * @version 1
+    * @author 
+    */
 	public void doActions()
 	{
+		int i;
+		//settingMode();
 		changed = false;
 		clearBasis();
+		//changeMode();
 		Buhberger();
-		removeDivided();
+		//removeDivided();
 	}
 	
+	/**
+    * Вывод исходной системы
+	*
+	* @param int type - режим отображения неизвестных. Если один, то выводит x,y,z, иначе x1,x2,x3
+    *
+    * @version 1
+    * @author 
+    */
 	public void outputBase(int type)
 	{
 		Scanner in = new Scanner(System.in);
@@ -85,6 +124,14 @@ public class Basis
 			System.out.println("Вы не вводили уравнения. Введите input(или in), чтобы ввести их.");
 	}
 	
+	/**
+    * Вывод базиса
+	*
+	* @param int type - режим отображения неизвестных. Если один, то выводит x,y,z, иначе x1,x2,x3
+    *
+    * @version 1
+    * @author 
+    */
 	public void output(int type)
 	{
 		int i;
@@ -110,6 +157,12 @@ public class Basis
 		}
 	}
 	
+	/**
+    * Алгоритм Бухбергера
+    *
+    * @version 1
+    * @author 
+    */
 	private void Buhberger()
 	{
 		start = System.nanoTime();
@@ -117,42 +170,35 @@ public class Basis
 		int i;
 		newLinkList();
 		boolean f = false;
-		if(polynoms.size() < 3)// basePolynoms.size())
-			sPolynom();
-		if(!changed)
+		//if(polynoms.size() < 3)// basePolynoms.size())
+			//sPolynom();
+		do
 		{
-			do
-			{
-				while(sPolynom2());
-				//output(1);
-				while(simple3());
-				//output(1);
-				f = sPolynom3();
-				time = TimeUnit.SECONDS.convert(System.nanoTime()-start, TimeUnit.NANOSECONDS);
-				if(time > LIMIT)
-					f = false;
-			} while(f);
+			while(sPolynom2());
+			//output(0);
+			//removeDivided();
+			while(simple3());
+			f = sPolynom3();
+			//output(0);
+			time = TimeUnit.SECONDS.convert(System.nanoTime()-start, TimeUnit.NANOSECONDS);
 			if(time > LIMIT)
-			{
-				System.out.println("Изменен режим сортировки, базис примет более приятный вид после просчета");
-				mode = mode^1;
-				clearBasis();
-				changed = true;
-				Buhberger();
-			}
-		}
-		else
+				f = false;
+		} while(f);
+		if(time > LIMIT)
 		{
-			do
-			{
-				while(sPolynom2());
-				while(simple3());
-				f = sPolynom2();
-			} while(f);
-			//removeEquals();
+			System.out.println("Изменен режим сортировки, базис примет более приятный вид после просчета");
+			changeMode();
+			changed = false;
+			Buhberger();
 		}
 	}
 	
+	/**
+    * Удаление из базиса делящихся по старшим членам полиномов
+    *
+    * @version 1
+    * @author 
+    */
 	private void removeDivided()
 	{
 		int i,j;
@@ -172,6 +218,12 @@ public class Basis
 		}
 	}
 	
+	/**
+    * Удаление из базиса одинаковых полиномов
+    *
+    * @version 1
+    * @author 
+    */
 	private void removeEquals()
 	{
 		int i,j;
@@ -189,7 +241,15 @@ public class Basis
 			}
 		}
 	}
-
+	
+	/**
+    * Упрощение базиса через редукцию
+    *
+	* @return true - если базис был упрощен, иначе false
+	*
+    * @version 1
+    * @author 
+    */
 	private boolean simple3()
 	{
 		boolean f = false;
@@ -224,20 +284,14 @@ public class Basis
 		return f;
 	}
 	
-	private void sPolynom()
-	{
-		Integer i,j;
-		for(i = 0; i < this.basePolynoms.size(); i++)
-			for(j = i+1; j < this.basePolynoms.size(); j++)
-			{
-				if(!this.isLinked(i,j))
-				{
-					this.basePolynoms.get(i).sPolynom( this.basePolynoms.get(j) ).reduce(this.polynoms, start, changed);
-					linked.add("");
-				}
-			}
-	}
-	
+	/**
+    * Построение S-полиномов для пар с зацеплением
+    *
+	* @return true - была построен минимум один S-полином, который был добавлен в базис, иначе - false
+	*
+    * @version 1
+    * @author 
+    */
 	private boolean sPolynom2()
 	{
 		boolean f = false, temp;
@@ -254,8 +308,8 @@ public class Basis
 						return false;
 				}
 				temp = false;
-				//if(i != j && !this.isLinked(i,j) && !this.polynoms.get(i).getHighMonom().gcd(this.polynoms.get(j).getHighMonom()).isConst() && triangle(i,j))		Критерии не работают!! Только хуже!
-				if(i != j && !this.isLinked(i,j) && !this.polynoms.get(i).getHighMonom().gcd(this.polynoms.get(j).getHighMonom()).isConst())
+				if(i != j && !this.isLinked(i,j) && !this.polynoms.get(i).getHighMonom().gcd(this.polynoms.get(j).getHighMonom()).isConst() && triangle(i,j))		//Критерии не работают!! Только хуже!
+				//if(i != j && !this.isLinked(i,j) && !this.polynoms.get(i).getHighMonom().gcd(this.polynoms.get(j).getHighMonom()).isConst())
 				//if(i != j && !this.isLinked(i,j))
 				{
 					//buff = this.polynoms.get(i).sPolynom2( this.polynoms.get(j) );
@@ -275,6 +329,14 @@ public class Basis
 		return f;
 	}
 	
+	/**
+    * Построение S-полиномов без зацепления
+    *
+	* @return true - была построен минимум один S-полином, который был добавлен в базис, иначе - false
+	*
+    * @version 1
+    * @author 
+    */
 	private boolean sPolynom3()
 	{
 		boolean f = false, temp;
@@ -312,6 +374,17 @@ public class Basis
 		return f;
 	}
 	
+	/**
+    * Проверка на то, были ли построены S-полиномы для пары полиномов
+	*
+	* @param Integer ths - номер первого полинома в системе
+	* @param Integer other - номер второго полинома в системе
+    *
+	* @return true - S-полином был построен, иначе - false
+	*
+    * @version 1
+    * @author 
+    */
 	private boolean isLinked(Integer ths, Integer other)		//Проверка на связку
 	{
 		String buffS = "," + other.toString() + "$";
@@ -321,6 +394,15 @@ public class Basis
 		return true;
 	}
 	
+	/**
+    * Добавление связки между двумя полиномами(то, что с ними были построен S-полином)
+	*
+	* @param Integer ths - номер первого полинома в системе
+	* @param Integer other - номер второго полинома в системе
+	*
+    * @version 1
+    * @author 
+    */
 	private void addLink(Integer ths, Integer other)
 	{
 		String buffS = "," + other.toString() + "$";
@@ -332,6 +414,17 @@ public class Basis
 		linked.set(ths, buffLink);
 	}
 	
+	/**
+    * Проверка на то, редуцируется ли S-полином к нулю
+	*
+	* @param Integer ths - номер первого полинома в системе
+	* @param Integer other - номер второго полинома в системе
+    *
+	* @return true - S-полином редукцируется к нулю, иначе - false
+	*
+    * @version 1
+    * @author 
+    */
 	private boolean isReducedToZero(BigPolinom ths)
 	{
 		boolean f;
@@ -345,6 +438,17 @@ public class Basis
 		return false;
 	}
 	
+	/**
+    * Правило треугольников
+	*
+	* @param int ths - номер первого полинома в системе
+	* @param int other - номер второго полинома в системе
+    *
+	* @return true - S-полином можно редукцировать, иначе - false
+	*
+    * @version 1
+    * @author 
+    */
 	private boolean triangle(int ths, int other)
 	{
 		int i;
@@ -362,6 +466,12 @@ public class Basis
 		return true;
 	}
 	
+	/**
+    * Создание пустого списка связок между полиномами
+	*
+    * @version 1
+    * @author 
+    */
 	private void newLinkList()
 	{
 		int i;
@@ -371,6 +481,12 @@ public class Basis
 			linked.add("");
 	}
 	
+	/**
+    * Сведение исходной системы уравнений к уравнению с одной неизвестной
+	*
+    * @version 1
+    * @author 
+    */
 	public void decision()
 	{
 		int i = 0;
@@ -378,15 +494,20 @@ public class Basis
 		BigPolinom end = new BigPolinom(this.polynoms.get(0).getFactors().get(0).getPowers().size(), "0");
 		BigPolinom tmp = new BigPolinom(this.polynoms.get(0).getFactors().get(0).getPowers().size(), "0");
 		BigPolinom reset = new BigPolinom(this.polynoms.get(0).getFactors().get(0).getPowers().size(), "0");
+		BigPolinom dec = new BigPolinom(this.polynoms.get(0).getFactors().get(0).getPowers().size(), "0");
+
+		boolean simple = true;
 		int k = 1;
 		//System.out.println(this.basePolynoms.size() + ":"+ i);
-		do {
-			//System.out.println(this.basePolynoms.size() + ":"+ i);
-			k = 1;
-			buf = this.basePolynoms.get(i);
-			//System.out.println("Само уравнение");
-			//System.out.println(buf);
-			while (k == 1) {
+		if(clearPowers()) {
+			do {
+				end = reset;
+				//System.out.println(this.basePolynoms.size() + ":" + i);
+				k = 1;
+				buf = this.basePolynoms.get(i);
+				//System.out.println("Само уравнение");
+				//System.out.println(buf);
+
 				//System.out.println("Пока");
 				for (int j = 0; j < this.polynoms.size(); j++) {
 					//System.out.println("Вошли в цикл");
@@ -394,8 +515,7 @@ public class Basis
 						//System.out.println("Делится");
 						if (buf.mod(this.polynoms.get(j)).isZero()) {
 							//System.out.println("Нулевой остаток");
-						}
-						else {
+						} else {
 							buf = buf.mod(this.polynoms.get(j));
 							//System.out.println("Поделили");
 							j = 0;
@@ -407,47 +527,48 @@ public class Basis
 				//System.out.println("Что должны добавить");
 				//System.out.println(buf);
 				if (buf.onlyOne()) {
-					k = 0;
 					//System.out.println("Содержит только одну переменную");
-					tmp = end.add(buf.getHighMonom().toBigPolinom());
-					if(tmp.onlyOne()) {
-						end = end.add(buf);
-					}
-					else{
-						end = reset;
-						k = 0;
-					}
+					end = end.add(buf);
 				}
 				else {
-					if(buf.getHighMonom().toBigPolinom().onlyOne()) {
-						tmp = end.add(buf.getHighMonom().toBigPolinom());
-						if(tmp.onlyOne()) {
-							end = end.add(buf.getHighMonom().toBigPolinom());
-							//System.out.println("Добавили только старший член");
-							//System.out.println(end);
-							buf = buf.add(buf.getHighMonom().toBigPolinom().multiplyByMinusOne());
-							//System.out.println("Отняли старший член");
-							//System.out.println(buf);
-						}
-						else{
-							end = reset;
-							k = 0;
-						}
-						tmp = reset;
+					//System.out.println("Содержит несколько");
+					if (buf.add(buf.getHighMonom().toBigPolinom().multiplyByMinusOne()).toString() == "0") {
+						//System.out.println("Моном");
+						end = end.add(buf);
 					}
-					else{
+					else {
 						end = reset;
-						k = 0;
 					}
 				}
 				//System.out.println("Конец");
 				//System.out.println(end);
-			}
-			i++;
-		}while((end.toString() == "0") && (i < this.basePolynoms.size()));
-		decision = end.clone();
+				if (!end.isZero() && simple) {
+					dec = end.clone();
+					simple = false;
+				}
+				if (end.toString() != "0") {
+					if (!dec.getHighMonom().toBigPolinom().divide(end.getHighMonom().toBigPolinom()).isZero()) {
+						dec = end.clone();
+					}
+				}
+
+				i++;
+			} while ((i < this.basePolynoms.size()));
+			decision = dec.clone();
+		}
+		else{
+			System.out.println("Уравнение имеет бесконечное количество решений.");
+		}
 	}
 	
+	/**
+    * Вывод уравнения, полученного в decision
+	*
+	* @param int type - режим отображения неизвестных. Если один, то выводит x,y,z, иначе x1,x2,x3
+    *
+    * @version 1
+    * @author 
+    */
 	public void outputDecision(int type)
 	{
 		String buffS;
@@ -461,13 +582,30 @@ public class Basis
 			buffS = buffS.replace("x3", "z");
 		}
 		System.out.println(buffS + "\n");
+		System.out.print("Количество решений: ");
+		System.out.println(decision.getHighMonom().getHighPower());
 	}
 	
+	/**
+    * Удаление старого решения системы
+	*
+    * @version 1
+    * @author 
+    */
 	public void clearDec()
 	{
 		decision = null;
 	}
 	
+	
+	/**
+    * Проверка на то, что в системе встречаются чистые степени неизвестных
+	*
+	* @return true - встречены чистые степени ВСЕХ неизвестных, иначе - false
+    *
+    * @version 1
+    * @author 
+    */
 	private boolean clearPowers()
 	{
 		int i, power;
@@ -487,6 +625,69 @@ public class Basis
 				return false;
 		}
 		return true;
+	}
+	
+	/**
+    * Установка упорядочевания по следующему методу:
+	* Старшинство строится по возрастанию максимальной степени неизвестной в системе
+	* На примере полинома:
+	* x^3+y^7+z
+	* Тут по возрастанию степени порядок будет такой: z,x,y
+	* Упорядоченный полином:
+	* z+x^3+y^7
+    *
+    * @version 1
+    * @author 
+    */
+	public void settingMode()
+	{
+		int i, j;
+		ArrayList<Integer> toMaxPowers = new ArrayList<Integer>();
+		ArrayList<Integer> buffMaxPowers = new ArrayList<Integer>();
+		i = this.basePolynoms.get(0).getFactors().get(0).getPowers().size();
+		while(toMaxPowers.size() != i)
+			toMaxPowers.add(0);
+		for(i = 0; i < this.basePolynoms.size(); i++)
+		{
+			buffMaxPowers = this.basePolynoms.get(i).getMaxPowers();
+			for(j = 0; j < toMaxPowers.size(); j++)
+				if(buffMaxPowers.get(j) > toMaxPowers.get(j))
+					toMaxPowers.set(j, buffMaxPowers.get(j));
+		}
+		for(i = 0; i < this.basePolynoms.size(); i++)
+			this.basePolynoms.get(i).setMode(toMaxPowers);
+		buffMaxPowers = this.basePolynoms.get(0).getMode();
+		this.mode = buffMaxPowers;
+		System.out.print("Упорядочевание:");
+		for(i = 0; i < buffMaxPowers.size(); i++)
+			System.out.print(" x" + (buffMaxPowers.get(i)+1));
+		System.out.println("");
+	}
+	
+	/**
+    * Установка нового упорядочевания по следующему методу:
+	* Вторая(на момент смены) неизвестная становится по старшенству последней
+    *
+    * @version 1
+    * @author 
+    */
+	private void changeMode()
+	{
+		int i, buff = -1;
+		for(i = 1; i < this.mode.size()-1; i++)
+		{
+			if(i == 1)
+				buff = this.mode.get(i);
+			this.mode.set(i, this.mode.get(i+1));
+		}
+		this.mode.set(i, buff);
+		for(i = 0; i < this.basePolynoms.size(); i++)
+			this.basePolynoms.get(i).setMode(this.mode);
+		clearBasis();
+		System.out.print("Упорядочевание:");
+		for(i = 0; i < this.mode.size(); i++)
+			System.out.print(" x" + (this.mode.get(i)+1));
+		System.out.println("");
 	}
 }
 

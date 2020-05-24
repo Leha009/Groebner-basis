@@ -10,7 +10,7 @@ import java.util.concurrent.TimeUnit;	//для отсчитывания секу
 public class BigPolinom
 {
 	private ArrayList<BigMonom> factors = new ArrayList<BigMonom>();
-	private int mode;															//режим сортировки: 0 - лексический, 1 - обратный лексический
+	private ArrayList<Integer> mode = new ArrayList<Integer>();															//режим сортировки: 0 - лексический, 1 - обратный лексический
 
 	private BigPolinom() {}
 
@@ -25,7 +25,7 @@ public class BigPolinom
 	* @version 1
 	* @author 
 	*/
-	public BigPolinom(int amount, String src, int curMode)
+	public BigPolinom(int amount, String src, ArrayList<Integer> curMode)
 	{
 		mode = curMode;
 		int i;
@@ -52,7 +52,7 @@ public class BigPolinom
 		this.sort();
 	}
 	
-	public BigPolinom(int amount, String src)		//для констант
+	public BigPolinom(int amount, String src)
 	{	
 		int i;
 		String[] str;
@@ -75,6 +75,8 @@ public class BigPolinom
 		{
 			factors.add(new BigMonom(amount, str[i].trim(),mode));
 		}
+		//setMode2();
+		//this.sort();
 	}
 
 	/**
@@ -172,7 +174,7 @@ public class BigPolinom
     * @author
     */
 	@Override
-	public BigPolinom clone()
+	public BigPolinom clone()	//Тут косяк
 	{
 		int i,n;
 		BigPolinom result = new BigPolinom();
@@ -452,7 +454,7 @@ public class BigPolinom
 		BigPolinom buffThis = this.clone();
         BigPolinom buffOther = other.clone();
 		BigPolinom result = buffOther;
-		BigPolinom one = new BigPolinom(this.factors.get(0).getPowers().size(), "1", mode);
+		BigPolinom one = new BigPolinom(this.factors.get(0).getPowers().size(), "1");
 		if(buffOther.isMoreThan(buffThis))
 		{
 			result = buffOther;
@@ -475,6 +477,16 @@ public class BigPolinom
 		return result;
     }
 	
+	/**
+    * НОК двух полиномов
+	*
+	* @param BigPolinom - other - второй полином
+	*
+	* @return НОК двух полиномов
+    *
+    * @version 1
+    * @author 
+    */
 	public BigPolinom lcm(BigPolinom other)
     {
 		return this.multiply(other).divide(this.gcd(other));
@@ -529,7 +541,7 @@ public class BigPolinom
 		return -1;
 	}
 	
-	public int monomIndexDivided(BigMonom other)	//Используется для делимости
+	/*public int monomIndexDivided(BigMonom other)	//Используется для делимости
 	{
 		int index;
 		for(index = 0; index < this.factors.size(); index++)	//индекс монома, который сравниваем с other
@@ -538,35 +550,7 @@ public class BigPolinom
 				return index;
 		}
 		return -1;
-	}
-	
-	/**
-    * Сортировка полинома
-    *
-    * @version 1
-    * @author 
-    */
-	public void sort()
-	{
-		int i;
-		BigPolinom buffThis = this.clone();
-		BigPolinom result = new BigPolinom();
-		BigMonom buffMonom;
-		while(buffThis.factors.size() > 0)
-		{
-			buffMonom = buffThis.factors.get(0);
-			for(i = 1; i < buffThis.factors.size(); i++)
-			{
-				if(buffMonom.compareTo( buffThis.factors.get(i) ) < 0)
-					buffMonom = buffThis.factors.get(i);
-			}
-			buffMonom.setCoef( buffMonom.getCoef().reduce() );
-			if(!buffMonom.isZero())
-				result.factors.add(buffMonom);
-			buffThis.factors.remove(buffThis.factors.indexOf(buffMonom));
-		}
-		this.factors = result.factors;
-	}
+	}*/
 	
 	/**
     * Проверка на делимость полиномов
@@ -610,17 +594,15 @@ public class BigPolinom
     * @version 1
     * @author 
     */
-	public BigPolinom sPolynom(BigPolinom other)	//Быстрее нижнего?
+	public BigPolinom sPolynom(BigPolinom other)
 	{
 		BigPolinom result = new BigPolinom();
 		BigPolinom buffThis = this.clone();
 		BigPolinom buffOther = other.clone();
 		BigMonom multiplier;
-		//multiplier = buffThis.getHighMonom().getMultiplier(buffOther.getHighMonom());
-		multiplier = buffThis.factors.get(0).getMultiplier(buffOther.factors.get(0));
+		multiplier = buffThis.getHighMonom().getMultiplier(buffOther.getHighMonom());
 		buffThis = buffThis.multiply(multiplier);
-		//multiplier = buffOther.getHighMonom().getMultiplier(buffThis.getHighMonom());
-		multiplier = buffOther.factors.get(0).getMultiplier(buffThis.factors.get(0));
+		multiplier = buffOther.getHighMonom().getMultiplier(buffThis.getHighMonom());
 		buffOther = buffOther.multiply(multiplier);
 		result = buffThis.subtract(buffOther);
 		return result;
@@ -638,11 +620,79 @@ public class BigPolinom
 		return result;
 	}
 	
+	/**
+    * Рекуция
+	*
+	* @param BigPolinom other - второй полином в паре
+	*
+    * @return BigPolinom result - s-полином
+    *
+    * @version 1
+    * @author 
+    */
+	public BigPolinom reduce2(ArrayList<BigPolinom> basis, long startTime, boolean changed)
+	{
+		int i, f;
+		BigPolinom buffThis = this.clone();
+		BigPolinom result = new BigPolinom(buffThis.factors.get(0).getPowers().size(), "0", this.mode);
+		BigMonom multiplier;
+		BigPolinom buffOther;
+		do
+		{
+			if(!changed)
+			{
+				long time = TimeUnit.SECONDS.convert(System.nanoTime()-startTime, TimeUnit.NANOSECONDS);
+				if(time > 60)
+					return buffThis;
+			}
+			for(i = 0, f = 0; i < basis.size() && f == 0; i++)
+			{
+				if(!this.equals2(basis.get(i)))
+					if(buffThis.factors.get(0).isDivided( basis.get(i).factors.get(0) ))
+						f = 1;
+			}
+			i--;
+			if(f == 0)
+			{
+				result.factors.add(buffThis.factors.get(0));
+				buffThis.factors.remove(0);
+			}
+			else
+			{
+				buffOther = basis.get(i).clone();
+				multiplier = buffOther.factors.get(0).getMultiplier(buffThis.factors.get(0));
+				buffOther = buffOther.multiply(multiplier);
+				buffThis = buffThis.subtract(buffOther);
+				buffThis.sort();
+			}
+		} while(!buffThis.isZero());
+		result.sort();
+		return result;
+	}
+	
+	public boolean reduce(ArrayList<BigPolinom> basis, long startTime, boolean changed)
+	{
+		int i,f = 0;
+		if(this.isZero())
+			return false;
+		BigPolinom reduced;
+		reduced = this.reduce2(basis, startTime, changed);
+		if(!reduced.isZero())
+			for(i = 0; i < basis.size() && f == 0; i++)
+				if(basis.get(i).equals2(reduced))
+					f++;
+		if(f == 0 && !reduced.isZero())
+			basis.add(reduced);
+		else
+			return false;
+		return true;
+	}
+	
 	public BigPolinom reduce22(ArrayList<BigPolinom> basis, long startTime, boolean changed)	//основано на делителе
 	{
 		int i = 0, f = 0;
 		BigPolinom buffThis = this.clone();
-		BigPolinom result = new BigPolinom(buffThis.factors.get(0).getPowers().size(), "0", mode);
+		BigPolinom result = new BigPolinom(buffThis.factors.get(0).getPowers().size(), "0");
 		BigPolinom divider;
 		do
 		{
@@ -661,9 +711,6 @@ public class BigPolinom
 			i--;
 			if(f == 0)
 			{
-				/*buffThis.factors.get(0).setCoef( buffThis.factors.get(0).getCoef().reduce() );
-				result.factors.add(buffThis.factors.get(0));
-				buffThis.factors.remove(0);*/
 				return buffThis;
 			}
 			else
@@ -671,110 +718,36 @@ public class BigPolinom
 				divider = buffThis.getHighMonom().toBigPolinom().divide( basis.get(i).getHighMonom().toBigPolinom());
 				buffThis = buffThis.subtract(basis.get(i).multiply(divider));
 				buffThis.sort();
-				/*if(!buffThis.isZero())
-					buffThis.divideByHighCoef();*/
-				/*if(!buffThis.isZero())	//убрать?
-					buffThis.simpleMod();*/
-				//System.out.print("T");
-				//System.out.println("\nbuffThis:" + buffThis);
 			}
 		} while(!buffThis.isZero());
 		result.sort();
-		/*if(!result.isZero())
-			result.divideByHighCoef();*/
-		//System.out.println("\nRES:" + result);
 		return result;
 	}
 	
+	
 	/**
-    * Рекуция
+    * Деление полинома на коэффициент старшего члена
 	*
-	* @param BigPolinom other - второй полином в паре
-	*
-    * @return BigPolinom result - s-полином
-    *
     * @version 1
     * @author 
     */
-	public BigPolinom reduce2(ArrayList<BigPolinom> basis, long startTime, boolean changed)
-	{
-		int i, f;
-		BigPolinom buffThis = this.clone();
-		BigPolinom result = new BigPolinom(buffThis.factors.get(0).getPowers().size(), "0", mode);
-		BigMonom multiplier;
-		BigPolinom buffOther;						//Полином, старший член которого делится на старший член buffThis
-		do
-		{
-			if(!changed)
-			{
-				long time = TimeUnit.SECONDS.convert(System.nanoTime()-startTime, TimeUnit.NANOSECONDS);
-				if(time > 60)
-					return buffThis;
-			}
-			for(i = 0, f = 0; i < basis.size() && f == 0; i++)
-			{
-				if(!buffThis.equals2(basis.get(i)))
-					if(buffThis.factors.get(0).isDivided( basis.get(i).factors.get(0) ))
-						f = 1;
-			}
-			i--;
-			if(f == 0)
-			{
-				result.factors.add(buffThis.factors.get(0));
-				buffThis.factors.remove(0);
-			}
-			else
-			{
-				buffOther = basis.get(i).clone();
-				multiplier = buffOther.factors.get(0).getMultiplier(buffThis.factors.get(0));
-				buffOther = buffOther.multiply(multiplier);
-				buffThis = buffThis.subtract(buffOther);
-				buffThis.sort();
-				/*if(!buffThis.isZero())
-					buffThis.gcdAndLcm();*/
-			}
-			//System.out.print("T");
-			//System.out.println("\nbuffThis:" + buffThis);
-		} while(!buffThis.isZero());
-		result.sort();
-		//result.gcdRational();
-		//System.out.println("\nRES:" + result);
-		return result;
-	}
-	
-	public boolean reduce(ArrayList<BigPolinom> basis, long startTime, boolean changed)
-	{
-		int i,f = 0;
-		if(this.isZero())
-			return false;
-		BigPolinom reduced;
-		reduced = this.reduce2(basis, startTime, changed);	//reduce2 вернуть
-		//System.out.println(reduced);
-		if(!reduced.isZero())
-			for(i = 0; i < basis.size() && f == 0; i++)
-				if(basis.get(i).equals2(reduced))
-					f++;
-		if(f == 0 && !reduced.isZero())
-		{
-			//reduced.simpleMod();	//убрать?
-			basis.add(reduced);
-		}
-		else
-			return false;
-		return true;
-	}
-	
 	public void divideByHighCoef()
 	{
 		int i;
 		BigQ highCoef = this.factors.get(0).getCoef();
 		for (i = 0; i < factors.size(); i++)
-		{
 			this.factors.get(i).setCoef(this.factors.get(i).getCoef().divide(highCoef));
-		}
-		//this.simpleMod();	//убрать?
 	}
 	
+	/**
+    * Проверка на то, что в полиноме встречается только одна переменная
+	*
+	*
+    * @return true - если в полиноме только одна переменная, иначе - false
+    *
+    * @version 1
+    * @author 
+    */
 	public boolean onlyOne()
 	{
 		if(this.getHighMonom().isConst())
@@ -802,11 +775,105 @@ public class BigPolinom
 		return factors;
 	}
 	
-	public void setMode(int curMode)
+	/**
+    * Сортировка полинома
+    *
+    * @version 1
+    * @author 
+    */
+	public void sort()
 	{
-		mode = curMode;
 		int i;
+		BigPolinom buffThis = this.clone();
+		BigPolinom result = new BigPolinom();
+		BigMonom buffMonom;
+		while(buffThis.factors.size() > 0)
+		{
+			buffMonom = buffThis.factors.get(0);
+			for(i = 1; i < buffThis.factors.size(); i++)
+			{
+				if(buffMonom.compareTo( buffThis.factors.get(i) ) < 0)
+					buffMonom = buffThis.factors.get(i);
+			}
+			buffMonom.setCoef( buffMonom.getCoef().reduce() );
+			if(!buffMonom.isZero())
+				if(result.monomIndex(buffMonom) == -1)
+					result.factors.add(buffMonom);
+				else
+					result.factors.get(result.monomIndex(buffMonom)).setCoef( result.factors.get(result.monomIndex(buffMonom)).getCoef().add(buffMonom.getCoef()) );
+			buffThis.factors.remove(buffThis.factors.indexOf(buffMonom));
+		}
+		this.factors = result.factors;
+	}
+
+	/**
+    * Установка режима упорядочевания переменных
+	*
+	* @param ArrayList<Integer> maxPowers - список максимальных степеней всех неизвестных
+	*
+    *
+    * @version 1
+    * @author 
+    */
+	public void setMode(ArrayList<Integer> maxPowers)
+	{
+		int i,max = -1,maxi = -1;
+		ArrayList<Integer> order = new ArrayList<Integer>();
+		ArrayList<Integer> buff = new ArrayList<Integer>();
+		for(i = 0; i < maxPowers.size(); i++)
+			buff.add(maxPowers.get(i));
+		while(buff.size() != order.size())
+		{
+			i = 0;
+			while(i < buff.size())
+			{
+				if(buff.get(i) > max)
+				{
+					max = buff.get(i);
+					maxi = i;
+				}
+				i++;
+			}
+			max = -1;
+			order.add(maxi);
+			buff.set(maxi, -1);
+		}
+		Collections.reverse(order);
+		this.mode = order;
 		for(i = 0; i < this.factors.size(); i++)
-			this.factors.get(i).setMode(mode);
+			this.factors.get(i).setMode(order);
+		this.sort();
+	}
+	
+	/**
+    * Получение максимальных степеней всех неизвестных в полиноме
+	*
+	*
+    * @return ArrayList<Integer> powers - максимальные степени всех неизвестных в полиноме
+    *
+    * @version 1
+    * @author 
+    */
+	public ArrayList<Integer> getMaxPowers()
+	{
+		int i, power, j;
+		power = this.factors.get(0).getPowers().size();
+		ArrayList<Integer> powers = new ArrayList<Integer>();
+		ArrayList<Integer> buffPowers;
+		for(i = 0; i < power; i++)
+			powers.add(0);
+		for(i = 0; i < this.factors.size(); i++)
+		{
+			buffPowers = this.factors.get(i).getPowers();
+			for(j = 0; j < buffPowers.size(); j++)
+				if(buffPowers.get(j) > powers.get(j))
+					powers.set(j, buffPowers.get(j));
+		}
+		return powers;
+	}
+	
+	public ArrayList<Integer> getMode()
+	{
+		return mode;
 	}
 }

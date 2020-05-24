@@ -6,7 +6,7 @@ import java.io.*;
 
 /**
 * Класс, который содержит интерфейс
-* @version 0.01
+* @version 1
 * @author 
 */
 public class Colloquium
@@ -20,12 +20,17 @@ public class Colloquium
 		System.out.println("Для ознакомления с программой введите \"?\" или \"help\"");
 		Interface();
 		
-		/*BigPolinom test = new BigPolinom(3, "1*x1*x2^2 + 1/2*x1^14 + 3/2*x1 + 7/2", 1);
-		BigPolinom test2 = new BigPolinom(3, "1*x1^3*x2^2 + 1*x1^2 + 4", 1);
-		System.out.println(test);
-		System.out.println(test2+"\n");
-		System.out.println(test.isDivided(test2));
-		System.out.println(test.sPolynom(test2));
+		/*ArrayList<Integer> dj = new ArrayList<Integer>();
+		dj.add(1);
+		dj.add(0);
+		dj.add(2);
+		BigPolinom test = new BigPolinom(3, "-1944/49*x2^10 + 9720/49*x2^9 - 18630/49*x2^8 + 16200/49*x2^7 - 5940/49*x2^6 + 1944/49*x2^5 - 2385/49*x2^4 + 990/49*x2^3 - 663/98*x2^2 + 753/98*x2 - 559/392-1944/49*x2^10", dj);
+		BigPolinom test2 = new BigPolinom(3, "x1^3*x2^2 + 1*x1^2", dj);
+		BigMonom test3 = new BigMonom(3, "x1x2", dj);
+		System.out.println(test.getHighMonom().getHighPower());
+		//System.out.println(test2+"\n");
+		//System.out.println(test2.multiply(test3));
+		//System.out.println(test.sPolynom(test2));
 		//System.out.println(test.mod(test2));*/
 	}
 	
@@ -147,19 +152,18 @@ public class Colloquium
 		String buffS;
 		int amount = 0;
 		int curMode = 0;
-		System.out.println("Введите количество неизвестных и режим сортировки через пробел\n0 - лексический режим сортивки x1 > x2 > x3, 1 - обратный лексический x3 > x2 > x1");
+		System.out.println("Введите количество неизвестных и режим сортировки через пробел");
 		try
 		{
 			do
 			{
 				System.out.print("> ");
 				amount = num.nextInt();
-				curMode = num.nextInt();
-			} while(amount < 1 || curMode < 0 || curMode > 1);
+			} while(amount < 1);
 			System.out.println("Ввод многочленов имеет следующий вид: каждая переменная должна содержать индекс после себя, например, 45x1 + 7/5x2^7");
 			base.clearAll();
 			base.setMaxPower(amount);
-			base.setMode(curMode);
+			//base.setMode(curMode);
 			if(amount < 4)
 			{
 				Scanner num2 = new Scanner(System.in);
@@ -189,10 +193,12 @@ public class Colloquium
 					base.addBasis(buffS);
 				}
 			} while(!buffS.equals(""));
+			base.settingMode();
 		}
 		catch(Throwable t)
 		{
 			System.out.println("Ошибка ввода, попробуйте еще раз.");
+			//System.out.println(t);
 		}
 	}
 	

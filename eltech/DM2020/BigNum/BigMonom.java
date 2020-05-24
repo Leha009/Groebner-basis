@@ -11,7 +11,7 @@ public class BigMonom
 {
 	private BigQ coef;												//коэффициент
 	private ArrayList<Integer> powers = new ArrayList<Integer>();	//степени x_i
-	private int mode;												//режим сортировки
+	private ArrayList<Integer> mode = new ArrayList<Integer>();	//режим сортировки
 	
 	private BigMonom() {}
 	
@@ -30,7 +30,7 @@ public class BigMonom
 	* @version 1
 	* @author 
 	*/
-	public BigMonom(int amount, String src, int curMode) throws IllegalArgumentException
+	public BigMonom(int amount, String src, ArrayList<Integer> curMode) throws IllegalArgumentException
 	{
 		mode = curMode;
 		int i, power, index;
@@ -123,9 +123,11 @@ public class BigMonom
 	@Override
 	public BigMonom clone()
 	{
+		int i;
 		BigMonom result = new BigMonom();
 		result.coef = this.coef.clone();
-		result.powers = new ArrayList<Integer>(this.powers);
+		for(i = 0; i < this.powers.size(); i++)
+			result.powers.add(this.powers.get(i));
 		result.mode = this.mode;
 		return result;
 	}
@@ -138,14 +140,7 @@ public class BigMonom
 	* @version 1
 	* @author
 	*/
-	public int compareTo(BigMonom other)
-	{
-		if(mode == 0)
-			return this.compTo(other);
-		return this.compTo2(other);
-	}
-	
-	public int compTo(BigMonom other)
+	/*public int compareTo(BigMonom other)
 	{
 		int i;
 		if(this.isZero())
@@ -161,11 +156,10 @@ public class BigMonom
 			else if(this.powers.get(i) < other.powers.get(i))
 				return -1;
 		return 0;
-	}
+	}*/
 	
-	public int compTo2(BigMonom other)	//z > y > x
+	public int compareTo(BigMonom other)
 	{
-		int i;
 		if(this.isZero())
 			if(other.isZero())
 				return 0;
@@ -173,10 +167,11 @@ public class BigMonom
 				return -1;
 		else if(other.isZero())
 			return 1;
-		for(i = this.powers.size()-1; i >= 0; i--)
-			if(this.powers.get(i) > other.powers.get(i))
+		int i;
+		for(i = 0; i < mode.size(); i++)
+			if(this.powers.get(mode.get(i)) > other.powers.get(mode.get(i)))
 				return 1;
-			else if(this.powers.get(i) < other.powers.get(i))
+			else if(this.powers.get(mode.get(i)) < other.powers.get(mode.get(i)))
 				return -1;
 		return 0;
 	}
@@ -289,12 +284,12 @@ public class BigMonom
 		return true;
 	}
 	
-	//if(other.powers.get(i) > this.powers.get(i) || (this.powers.get(i) == 0 && other.powers.get(i) != 0) || (other.powers.get(i) == 0 && this.powers.get(i) != 0))
-
 	/**
     * НОД
 	*
-    * @return result - НОД
+	* @param BigMonom other - второй моном
+	*
+    * @return BigMonom result - НОД
     *
     * @version 1
     * @author 
@@ -305,7 +300,7 @@ public class BigMonom
 		BigMonom buffThis = this.clone();
         BigMonom buffOther = other.clone();
 		BigMonom buff;
-		BigMonom result = new BigMonom(this.powers.size(), "1", mode);
+		BigMonom result = new BigMonom(this.powers.size(), "1", this.mode);
 		if(buffThis.isLessThan(buffOther))
 		{
 			buff = buffOther;
@@ -320,18 +315,36 @@ public class BigMonom
 		return result;
 	}
 	
+	/**
+    * НОК
+	*
+	* @param BigMonom other - второй моном
+	*
+    * @return BigMonom result - НОК мономов
+    *
+    * @version 1
+    * @author 
+    */
 	public BigMonom lcm(BigMonom other)
 	{
 		int i;
 		BigMonom buffThis = this.clone();
 		BigMonom buffOther = other.clone();
-		BigMonom result = new BigMonom(this.powers.size(), "1", mode);
+		BigMonom result = new BigMonom(this.powers.size(), "1", this.mode);
 		for(i = 0; i < this.powers.size(); i++)
 			result.powers.set(i, Math.max(this.powers.get(i), other.powers.get(i)));
 		//result.setCoef(buffThis.getCoef().lcm(buffOther.getCoef()));
 		return result;
 	}
 	
+	/**
+    * Конвертация в BigPolinom
+	*
+    * @return BigPolinom result - НОД
+    *
+    * @version 1
+    * @author 
+    */
 	public BigPolinom toBigPolinom()
 	{
 		BigPolinom result = new BigPolinom(this.powers.size(), "1");
@@ -340,6 +353,14 @@ public class BigMonom
 		return result;
 	}
 	
+	/**
+    * Проверка, что моном - константа
+	*
+    * @return true - моном является константой, иначе false
+    *
+    * @version 1
+    * @author 
+    */
 	public boolean isConst()
 	{
 		int i;
@@ -349,13 +370,21 @@ public class BigMonom
 		return true;
 	}
 	
+	/**
+    * Получение первой ненулевой степени
+	*
+    * @return int i - индекс переменной с ненулевой степенью
+    *
+    * @version 1
+    * @author 
+    */
 	public int getHighPower()
 	{
 		int i;
 		for(i = 0; i < this.powers.size(); i++)
 		{
-			if(this.powers.get(i) != 0)
-				return i;
+			if(this.powers.get(i) > 0)
+				return this.powers.get(i);
 		}
 		return i;
 	}
@@ -371,6 +400,14 @@ public class BigMonom
 		return s1 >= s2 ? 1 : s1 == s2 ? 0 : -1;
 	}
 	
+	/**
+    * Проверка, что в мономе только одна неизвестная
+	*
+    * @return true - в мономе одна переменная, иначе - false
+    *
+    * @version 1
+    * @author 
+    */
 	public int clearPower()
 	{
 		int i,power = -1;
@@ -409,12 +446,12 @@ public class BigMonom
 		coef = num;
 	}
 	
-	public void setMode(int curMode)
+	public void setMode(ArrayList<Integer> curMode)
 	{
 		mode = curMode;
 	}
 	
-	public int getMode()
+	public ArrayList<Integer> getMode()
 	{
 		return mode;
 	}
