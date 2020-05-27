@@ -138,6 +138,12 @@ public class Colloquium
 							System.out.println("Вы не вводили полиномы. Введите input(или in), чтобы ввести их.");
 						break;
 					}
+					case "spoly":{}
+					case "spolynom":
+					{
+						SPolynom();
+						break;
+					}
 					default:
 					{
 						System.out.println("Данной команды не существует. Посмотрите команды в help.");
@@ -239,8 +245,8 @@ public class Colloquium
 		}
 		catch(Throwable t)
 		{
-			//System.out.println("Ошибка ввода, попробуйте еще раз.");
-			System.out.println(t);
+			System.out.println("Ошибка ввода, попробуйте еще раз.");
+			//System.out.println(t);
 		}
 	}
 	
@@ -352,6 +358,89 @@ public class Colloquium
 			{
 				polys.get(i).setMode(order);
 			}
+		}
+		catch(Throwable t)
+		{
+			System.out.println("Ошибка ввода, попробуйте еще раз.");
+			//System.out.println(t);
+		}
+	}
+	
+	private static void SPolynom()
+	{
+		Scanner num = new Scanner(System.in);
+		String buffS;
+		BigPolinom first = new BigPolinom(1, "0");
+		BigPolinom second = new BigPolinom(1, "0");
+		ArrayList<Integer> order = new ArrayList<Integer>();
+		int amount = 0;
+		int k = 0;
+		int i;
+		System.out.println("Введите количество неизвестных");
+		try
+		{
+			do
+			{
+				System.out.print("> ");
+				amount = num.nextInt();
+			} while(amount < 1);
+			System.out.println("Введите построчно порядок неизвестных");
+			while(order.size() != amount)
+			{
+				Scanner orderIn = new Scanner(System.in);
+				k = orderIn.nextInt();
+				if(k > 0 && k <= amount)
+				{
+					if(order.indexOf(k) == -1)
+						order.add(k);
+					else
+					{
+						System.out.println("Данный индекс уже был использован");
+						System.out.println("Текущий порядок: " + order);
+					}
+				}
+				else
+					System.out.println("Такого индекса быть не может. Максимум " + amount);
+			}
+			for(i = 0; i < order.size(); i++)
+				order.set(i, order.get(i)-1);
+			System.out.println("Ввод многочленов имеет следующий вид: каждая переменная должна содержать индекс после себя, например, 45x1 + 7/5x2^7");
+			if(amount < 4)
+			{
+				Scanner num2 = new Scanner(System.in);
+				System.out.println("\nВведите любое число, отличное от нуля, чтобы использовать следующий вид переменных: x y z");
+				System.out.print("> ");
+				mode = num2.nextInt();
+			}
+			else
+				mode = 0;
+			System.out.println("\nПострочно вводите полиномы.");
+			i = 0;
+			do
+			{
+				Scanner input = new Scanner(System.in);
+				buffS = input.nextLine();
+				if(!buffS.equals(""))
+				{
+					if(mode != 0)
+					{
+						buffS = buffS.replace("x", "x1");
+						buffS = buffS.replace("y", "x2");
+						buffS = buffS.replace("z", "x3");
+					}
+					else
+					{
+						buffS = buffS.replace("y", "x2");
+						buffS = buffS.replace("z", "x3");
+					}
+					if(i == 0)
+						first = new BigPolinom(amount, buffS, order);
+					else
+						second = new BigPolinom(amount, buffS, order);
+					i++;
+				}
+			} while(!buffS.equals("") && i < 2);
+			System.out.println("S-полином: " + first.sPolynom(second));
 		}
 		catch(Throwable t)
 		{
