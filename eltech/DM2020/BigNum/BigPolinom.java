@@ -280,6 +280,8 @@ public class BigPolinom
 			return new BigPolinom(other.factors.get(0).getPowers().size(), "1");
 		else if(other.isZero())
 			return new BigPolinom(this.factors.get(0).getPowers().size(), "1");
+		if(other.toString().equals("1"))
+			return this.clone();
         int i,j,index;
 		String buffS = "0";
         BigPolinom result = new BigPolinom();
@@ -599,11 +601,15 @@ public class BigPolinom
 		BigPolinom result = new BigPolinom();
 		BigPolinom buffThis = this.clone();
 		BigPolinom buffOther = other.clone();
-		BigMonom multiplier;
+		BigMonom multiplier;	//недостающая часть
+		//получаем сначала для первого полинома
 		multiplier = buffThis.getHighMonom().getMultiplier(buffOther.getHighMonom());
+		//умножаем на недостающую часть
 		buffThis = buffThis.multiply(multiplier);
+		//проделываем то же самое для второго
 		multiplier = buffOther.getHighMonom().getMultiplier(buffThis.getHighMonom());
 		buffOther = buffOther.multiply(multiplier);
+		//вычитаем из первого полинома второй
 		result = buffThis.subtract(buffOther);
 		return result;
 	}
@@ -623,19 +629,26 @@ public class BigPolinom
 	/**
     * Рекуция
 	*
-	* @param BigPolinom other - второй полином в паре
+	* @param ArrayList<BigPolinom> basis - базис, по которому редуцируем
+	* @param long startTime - уже потраченное время на работу с базисом
+	* @param boolean changed - это последняя сортировка
+	* @param boolean reducePoly - true, если это вызвано из reduceInput, иначе false
 	*
-    * @return BigPolinom result - s-полином
+    * @return BigPolinom result - полином после редукции
     *
     * @version 1
     * @author 
     */
-	public BigPolinom reduce2(ArrayList<BigPolinom> basis, long startTime, boolean changed)
+	public BigPolinom reduce2(ArrayList<BigPolinom> basis, long startTime, boolean changed, boolean reducePoly)
 	{
 		int i, f;
+		//buffThis - редуцируемый полином
 		BigPolinom buffThis = this.clone();
+		//result - полином после редукции
 		BigPolinom result = new BigPolinom(buffThis.factors.get(0).getPowers().size(), "0", this.mode);
+		//недостающая часть полинома, по которому редуцируем
 		BigMonom multiplier;
+		//полином, по которому редуцируем
 		BigPolinom buffOther;
 		do
 		{
@@ -645,23 +658,44 @@ public class BigPolinom
 				if(time > 60)
 					return buffThis;
 			}
+			//проходим по всем полиномам текущего базиса
+			//и ищем тот полином, который делится на buffThis
 			for(i = 0, f = 0; i < basis.size() && f == 0; i++)
 			{
-				if(!this.equals2(basis.get(i)))
+				//важно! смотрим, чтобы на первом шаге полином
+				//не редуцировался сам по себе, иначе
+				//получим нуль
+				if(!reducePoly)
+				{
+					if(!this.equals2(basis.get(i)))
+						if(buffThis.factors.get(0).isDivided( basis.get(i).factors.get(0) ))
+							f = 1;
+				}
+				else
 					if(buffThis.factors.get(0).isDivided( basis.get(i).factors.get(0) ))
-						f = 1;
+							f = 1;
 			}
 			i--;
+			//Если старший член не поделился ни на один старший член
+			//полинома из базиса, то отставляем его в сторону
+			//и продолжаем редукцию с остальными членами
 			if(f == 0)
 			{
 				result.factors.add(buffThis.factors.get(0));
 				buffThis.factors.remove(0);
 			}
+			//Если старший член делится на старший член
+			//какого-то полинома
 			else
 			{
+				//buffOther - полином, старший член которого
+				//делит старший член buffThis
 				buffOther = basis.get(i).clone();
+				//получаем недостающую часть для buffOther, чтобы
+				//ликвидировать старший член buffThis
 				multiplier = buffOther.factors.get(0).getMultiplier(buffThis.factors.get(0));
 				buffOther = buffOther.multiply(multiplier);
+				//Вычитаем из buffThis buffOther
 				buffThis = buffThis.subtract(buffOther);
 				buffThis.sort();
 			}
@@ -676,7 +710,7 @@ public class BigPolinom
 		if(this.isZero())
 			return false;
 		BigPolinom reduced;
-		reduced = this.reduce2(basis, startTime, changed);
+		reduced = this.reduce2(basis, startTime, changed, false);
 		if(!reduced.isZero())
 			for(i = 0; i < basis.size() && f == 0; i++)
 				if(basis.get(i).equals2(reduced))
@@ -785,22 +819,34 @@ public class BigPolinom
 	{
 		int i;
 		BigPolinom buffThis = this.clone();
+		//в result будем вписывать отсортированный полином
 		BigPolinom result = new BigPolinom();
+		//buffMonom - очередной член полинома
 		BigMonom buffMonom;
 		while(buffThis.factors.size() > 0)
 		{
+			//берем первый одночлен из исходного полинома
 			buffMonom = buffThis.factors.get(0);
+			//сравниваниваем его с остальными
 			for(i = 1; i < buffThis.factors.size(); i++)
 			{
+				//сравниваем buffMonom с другим членом полинома
+				//если второй окажется старше
+				//то buffMonom станет им
 				if(buffMonom.compareTo( buffThis.factors.get(i) ) < 0)
 					buffMonom = buffThis.factors.get(i);
 			}
 			buffMonom.setCoef( buffMonom.getCoef().reduce() );
 			if(!buffMonom.isZero())
+			//если одночлена нет в отсортированном полиноме
+			//то добавляем его ко всему списку
+			//если есть, то меняем коэффициент
 				if(result.monomIndex(buffMonom) == -1)
 					result.factors.add(buffMonom);
 				else
 					result.factors.get(result.monomIndex(buffMonom)).setCoef( result.factors.get(result.monomIndex(buffMonom)).getCoef().add(buffMonom.getCoef()) );
+			//ниже убираем текущий на данный момент
+			//старший одночлен из неотсортированного полинома
 			buffThis.factors.remove(buffThis.factors.indexOf(buffMonom));
 		}
 		this.factors = result.factors;
@@ -815,7 +861,7 @@ public class BigPolinom
     * @version 1
     * @author 
     */
-	public void setMode(ArrayList<Integer> maxPowers)
+	/*public void setMode(ArrayList<Integer> maxPowers)
 	{
 		int i,max = -1,maxi = -1;
 		ArrayList<Integer> order = new ArrayList<Integer>();
@@ -840,6 +886,15 @@ public class BigPolinom
 		}
 		Collections.reverse(order);
 		this.mode = order;
+		for(i = 0; i < this.factors.size(); i++)
+			this.factors.get(i).setMode(order);
+		this.sort();
+	}*/
+	
+	public void setMode(ArrayList<Integer> order)
+	{
+		int i;
+		mode = order;
 		for(i = 0; i < this.factors.size(); i++)
 			this.factors.get(i).setMode(order);
 		this.sort();

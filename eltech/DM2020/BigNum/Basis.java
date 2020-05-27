@@ -5,13 +5,15 @@ import java.util.concurrent.TimeUnit;	//для отсчитывания секу
 
 public class Basis
 {
-	public ArrayList<BigPolinom> polynoms = new ArrayList<BigPolinom>();		//Базис Грёбнера
+	private ArrayList<BigPolinom> polynoms = new ArrayList<BigPolinom>();		//Базис Грёбнера
 	private ArrayList<BigPolinom> basePolynoms = new ArrayList<BigPolinom>();	//Исходные уравнения
-	private ArrayList<String> linked = new ArrayList<String>();	//Записываем номера тех многочленов, с которыми уже строили S полином
-	private int maxpower;														//Кол-во неизвестных
+	private ArrayList<String> linked = new ArrayList<String>();					//Записываем номера тех многочленов, с которыми уже строили S полином
+	private int maxvars;														//Кол-во неизвестных
 	private BigPolinom decision;
 	private ArrayList<Integer> mode;											//режим сортировки
-	private boolean changed;													//Была ли смена сортировки
+	private ArrayList<Integer> ourFirstMode;									//наш режим сортировки
+	private boolean changed;													//Проверили все варианты упорядочивания
+	private int OurMode;														//0 - наш режим сортировки не использован, 1 - использован, 2 - прошли все варианты
 	private long time;															//Потраченное время
 	private long start;															//Время начала
 	private static final int LIMIT = 60;										//Предел рассчета
@@ -58,8 +60,8 @@ public class Basis
     */
 	public void addBasis(String newPolynom)
 	{
-		//polynoms.add( new BigPolinom(maxpower, newPolynom) );
-		basePolynoms.add( new BigPolinom(maxpower, newPolynom) );
+		//polynoms.add( new BigPolinom(maxvars, newPolynom) );
+		basePolynoms.add( new BigPolinom(maxvars, newPolynom, mode) );
 	}
 	
 	/**
@@ -70,9 +72,9 @@ public class Basis
     * @version 1
     * @author 
     */
-	public void setMaxPower(int power)
+	public void setMaxVars(int vars)
 	{
-		maxpower = power;
+		maxvars = vars;
 	}
 	
 	/**
@@ -86,6 +88,7 @@ public class Basis
 		int i;
 		//settingMode();
 		changed = false;
+		OurMode = 0;
 		clearBasis();
 		//changeMode();
 		Buhberger();
@@ -172,24 +175,40 @@ public class Basis
 		boolean f = false;
 		//if(polynoms.size() < 3)// basePolynoms.size())
 			//sPolynom();
-		do
+		if(!changed)
 		{
-			while(sPolynom2());
-			//output(0);
-			//removeDivided();
-			while(simple3());
-			f = sPolynom3();
-			//output(0);
-			time = TimeUnit.SECONDS.convert(System.nanoTime()-start, TimeUnit.NANOSECONDS);
+			do
+			{
+				while(sPolynom2());
+				//output(0);
+				//removeDivided();
+				while(simple3());
+				f = sPolynom3();
+				//output(0);
+				time = TimeUnit.SECONDS.convert(System.nanoTime()-start, TimeUnit.NANOSECONDS);
+				if(time > LIMIT)
+					f = false;
+			} while(f);
 			if(time > LIMIT)
-				f = false;
-		} while(f);
-		if(time > LIMIT)
+			{
+				System.out.println("Изменен режим сортировки, базис примет более приятный вид после просчета");
+				settingMode();
+				clearBasis();
+				changed = true;
+				Buhberger();
+			}
+		}
+		else
 		{
-			System.out.println("Изменен режим сортировки, базис примет более приятный вид после просчета");
-			changeMode();
-			changed = false;
-			Buhberger();
+			do
+			{
+				while(sPolynom2());
+				//output(0);
+				//removeDivided();
+				while(simple3());
+				f = sPolynom3();
+				//output(0);
+			} while(f);
 		}
 	}
 	
@@ -264,7 +283,7 @@ public class Basis
 				if(time > LIMIT)
 					return false;
 			}
-			buff = this.polynoms.get(i).reduce2(this.polynoms, start, changed);	//reduce2
+			buff = this.polynoms.get(i).reduce2(this.polynoms, start, changed, false);	//reduce2
 			if(!(buff.equals2(this.polynoms.get(i))))
 			{
 				if(buff.isZero())
@@ -628,7 +647,7 @@ public class Basis
 	}
 	
 	/**
-    * Установка упорядочевания по следующему методу:
+    * Установка упорядочивания по следующему методу:
 	* Старшинство строится по возрастанию максимальной степени неизвестной в системе
 	* На примере полинома:
 	* x^3+y^7+z
@@ -641,9 +660,10 @@ public class Basis
     */
 	public void settingMode()
 	{
-		int i, j;
+		int i, j, max = -1,maxi = -1;
 		ArrayList<Integer> toMaxPowers = new ArrayList<Integer>();
 		ArrayList<Integer> buffMaxPowers = new ArrayList<Integer>();
+		ArrayList<Integer> order = new ArrayList<Integer>();
 		i = this.basePolynoms.get(0).getFactors().get(0).getPowers().size();
 		while(toMaxPowers.size() != i)
 			toMaxPowers.add(0);
@@ -654,18 +674,37 @@ public class Basis
 				if(buffMaxPowers.get(j) > toMaxPowers.get(j))
 					toMaxPowers.set(j, buffMaxPowers.get(j));
 		}
+		
+		while(toMaxPowers.size() != order.size())
+		{
+			i = 0;
+			while(i < toMaxPowers.size())
+			{
+				if(toMaxPowers.get(i) > max)
+				{
+					max = toMaxPowers.get(i);
+					maxi = i;
+				}
+				i++;
+			}
+			max = -1;
+			order.add(maxi);
+			toMaxPowers.set(maxi, -1);
+		}
+		Collections.reverse(order);
+		
 		for(i = 0; i < this.basePolynoms.size(); i++)
-			this.basePolynoms.get(i).setMode(toMaxPowers);
-		buffMaxPowers = this.basePolynoms.get(0).getMode();
-		this.mode = buffMaxPowers;
-		System.out.print("Упорядочевание:");
-		for(i = 0; i < buffMaxPowers.size(); i++)
-			System.out.print(" x" + (buffMaxPowers.get(i)+1));
+			this.basePolynoms.get(i).setMode(order);
+		this.mode = order;
+		this.ourFirstMode = order;
+		System.out.print("Упорядочивание:");
+		for(i = 0; i < order.size(); i++)
+			System.out.print(" x" + (order.get(i)+1));
 		System.out.println("");
 	}
 	
 	/**
-    * Установка нового упорядочевания по следующему методу:
+    * Установка нового упорядочивания по следующему методу:
 	* Вторая(на момент смены) неизвестная становится по старшенству последней
     *
     * @version 1
@@ -674,20 +713,58 @@ public class Basis
 	private void changeMode()
 	{
 		int i, buff = -1;
-		for(i = 1; i < this.mode.size()-1; i++)
+		if(OurMode == 0)	//вписать
 		{
-			if(i == 1)
-				buff = this.mode.get(i);
-			this.mode.set(i, this.mode.get(i+1));
+			settingMode();
+			OurMode = 1;
 		}
-		this.mode.set(i, buff);
-		for(i = 0; i < this.basePolynoms.size(); i++)
-			this.basePolynoms.get(i).setMode(this.mode);
-		clearBasis();
-		System.out.print("Упорядочевание:");
-		for(i = 0; i < this.mode.size(); i++)
-			System.out.print(" x" + (this.mode.get(i)+1));
-		System.out.println("");
+		else
+		{
+			for(i = 1; i < this.mode.size()-1; i++)
+			{
+				if(i == 1)
+					buff = this.mode.get(i);
+				this.mode.set(i, this.mode.get(i+1));
+			}
+			this.mode.set(i, buff);
+			for(i = 0; i < this.basePolynoms.size(); i++)
+				this.basePolynoms.get(i).setMode(this.mode);
+			clearBasis();
+			System.out.print("Упорядочивание:");
+			for(i = 0; i < this.mode.size(); i++)
+				System.out.print(" x" + (this.mode.get(i)+1));
+			System.out.println("");
+			if(this.mode.equals(this.ourFirstMode))
+			{
+				OurMode = 2;
+				changed = true;
+			}
+		}
+	}
+	
+	public int getMaxVars()
+	{
+		return maxvars;
+	}
+	
+	public void setMode(ArrayList<Integer> order)
+	{
+		mode = order;
+	}
+	
+	public ArrayList<Integer> getMode()
+	{
+		return mode;
+	}
+	
+	public ArrayList<BigPolinom> getBasis()
+	{
+		return polynoms;
+	}
+	
+	public ArrayList<BigPolinom> getBase()
+	{
+		return basePolynoms;
 	}
 }
 

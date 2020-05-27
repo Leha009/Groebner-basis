@@ -160,19 +160,29 @@ public class BigMonom
 	
 	public int compareTo(BigMonom other)
 	{
+		//смотрим, чтобы сравниваемый одночлен не был нулем
 		if(this.isZero())
+			//если одночлен, с которым сравниваем
+			//тоже нуль, то они равны
+			//иначе нет
 			if(other.isZero())
 				return 0;
 			else
 				return -1;
+		//если сравниваемый - не нуль, а второй - нуль
+		//то, очевидно, сравниваемый больше
 		else if(other.isZero())
 			return 1;
 		int i;
+		//ниже смотрим степени при неизвестных, начиная со старших
+		//в зависимости от того, в каком одночлене степень отличается
+		//узнаем какой и больше
 		for(i = 0; i < mode.size(); i++)
 			if(this.powers.get(mode.get(i)) > other.powers.get(mode.get(i)))
 				return 1;
 			else if(this.powers.get(mode.get(i)) < other.powers.get(mode.get(i)))
 				return -1;
+		//если степени все равны, то и одночлены равны
 		return 0;
 	}
 	
@@ -253,12 +263,17 @@ public class BigMonom
 	public BigMonom getMultiplier(BigMonom other)
 	{
 		int i;
+		//result - на данный момент, одночлен, который домножаем
 		BigMonom result = this.clone();
-		result.setCoef( other.getCoef().divide(result.getCoef()) );		//Коэффициент монома = частное от коэффициента other на коэффициент result
+		//Коэффициент монома = частное от коэффициента other на коэффициент result
+		result.setCoef( other.getCoef().divide(result.getCoef()) );
 		for(i = 0; i < result.powers.size(); i++)
-			if(result.powers.get(i) <= other.powers.get(i))		//Если в result какая-то степень меньше степени в other, то запишем разницу степеней other-result
+			//Если в result какая-то степень меньше степени в other,
+			//то запишем разницу степеней other-result
+			if(result.powers.get(i) <= other.powers.get(i))		
 				result.powers.set(i, other.powers.get(i) - result.powers.get(i));
-			else	//Степень в result >= other, поэтому домнажать не надо будет => степень 0
+			//Степень в result > other, поэтому домнажать не надо будет => степень 0
+			else
 				result.powers.set(i, 0);
 		return result;
 	}

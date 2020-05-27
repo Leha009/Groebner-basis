@@ -68,7 +68,7 @@ public class Colloquium
 						if(inputed != 0)
 							outputOriginal();
 						else
-							System.out.println("Вы не вводили уравнения. Введите input(или in), чтобы ввести их.");
+							System.out.println("Вы не вводили полиномы. Введите input(или in), чтобы ввести их.");
 						break;
 					}
 					case "basis":
@@ -82,7 +82,7 @@ public class Colloquium
 							formed = 1;
 						}
 						else
-							System.out.println("Вы не вводили уравнения. Введите input(или in), чтобы ввести их.");
+							System.out.println("Вы не вводили полиномы. Введите input(или in), чтобы ввести их.");
 						break;
 					}
 					case "outputbasis":{}
@@ -94,7 +94,7 @@ public class Colloquium
 							if(inputed != 0)
 								System.out.println("Вы еще не сформировали базис. Введите basis, чтобы сформировать его.");
 							else
-								System.out.println("Вы не вводили уравнения. Введите input(или in), чтобы ввести их.");
+								System.out.println("Вы не вводили полиномы. Введите input(или in), чтобы ввести их.");
 						break;
 					}
 					case "?":{}
@@ -115,7 +115,27 @@ public class Colloquium
 						if(inputed != 0 && formed != 0)
 							dicision();
 						else
-							System.out.println("Необходимо ввести уравнения и/или сформировать базис для них.");
+							System.out.println("Необходимо ввести полиномы и/или сформировать базис для них.");
+						break;
+					}
+					case "reduce":
+					{
+						if(formed != 0)
+							reduceInput();
+						else
+							if(inputed != 0)
+								System.out.println("Вы еще не сформировали базис. Введите basis, чтобы сформировать его.");
+							else
+								System.out.println("Вы не вводили полиномы. Введите input(или in), чтобы ввести их.");
+						break;
+					}
+					case "cord":{}
+					case "changeorder":
+					{
+						if(inputed != 0)
+							changeOrder();
+						else
+							System.out.println("Вы не вводили полиномы. Введите input(или in), чтобы ввести их.");
 						break;
 					}
 					default:
@@ -150,9 +170,11 @@ public class Colloquium
 	{
 		Scanner num = new Scanner(System.in);
 		String buffS;
+		ArrayList<Integer> order = new ArrayList<Integer>();
 		int amount = 0;
-		int curMode = 0;
-		System.out.println("Введите количество неизвестных и режим сортировки через пробел");
+		int k = 0;
+		int i;
+		System.out.println("Введите количество неизвестных");
 		try
 		{
 			do
@@ -160,10 +182,30 @@ public class Colloquium
 				System.out.print("> ");
 				amount = num.nextInt();
 			} while(amount < 1);
+			System.out.println("Введите построчно порядок неизвестных");
+			while(order.size() != amount)
+			{
+				Scanner orderIn = new Scanner(System.in);
+				k = orderIn.nextInt();
+				if(k > 0 && k <= amount)
+				{
+					if(order.indexOf(k) == -1)
+						order.add(k);
+					else
+					{
+						System.out.println("Данный индекс уже был использован");
+						System.out.println("Текущий порядок: " + order);
+					}
+				}
+				else
+					System.out.println("Такого индекса быть не может. Максимум " + amount);
+			}
+			for(i = 0; i < order.size(); i++)
+				order.set(i, order.get(i)-1);
 			System.out.println("Ввод многочленов имеет следующий вид: каждая переменная должна содержать индекс после себя, например, 45x1 + 7/5x2^7");
 			base.clearAll();
-			base.setMaxPower(amount);
-			//base.setMode(curMode);
+			base.setMaxVars(amount);
+			base.setMode(order);
 			if(amount < 4)
 			{
 				Scanner num2 = new Scanner(System.in);
@@ -173,7 +215,7 @@ public class Colloquium
 			}
 			else
 				mode = 0;
-			System.out.println("\nПострочно вводите уравнения. Чтобы прекратить ввод, нажмите Enter");
+			System.out.println("\nПострочно вводите полиномы. Чтобы прекратить ввод, нажмите Enter");
 			do
 			{
 				buffS = in.nextLine();
@@ -193,12 +235,12 @@ public class Colloquium
 					base.addBasis(buffS);
 				}
 			} while(!buffS.equals(""));
-			base.settingMode();
+			//base.settingMode();
 		}
 		catch(Throwable t)
 		{
-			System.out.println("Ошибка ввода, попробуйте еще раз.");
-			//System.out.println(t);
+			//System.out.println("Ошибка ввода, попробуйте еще раз.");
+			System.out.println(t);
 		}
 	}
 	
@@ -223,5 +265,98 @@ public class Colloquium
 	private static void dicision()
 	{
 		base.outputDecision(mode);
+	}
+	
+	private static void reduceInput()
+	{
+		String buffS;
+		int maxvars = base.getMaxVars();
+		System.out.println("Напомним, всего неизвестных " + maxvars);
+		try
+		{
+			if(maxvars < 4)
+			{
+				Scanner num2 = new Scanner(System.in);
+				System.out.println("\nВведите любое число, отличное от нуля, чтобы использовать следующий вид переменных: x y z");
+				System.out.print("> ");
+				mode = num2.nextInt();
+			}
+			else
+				mode = 0;
+			System.out.println("\nВведите полином");
+			buffS = in.nextLine();
+			if(!buffS.equals(""))
+			{
+				if(mode != 0)
+				{
+					buffS = buffS.replace("x", "x1");
+					buffS = buffS.replace("y", "x2");
+					buffS = buffS.replace("z", "x3");
+				}
+				else
+				{
+					buffS = buffS.replace("y", "x2");
+					buffS = buffS.replace("z", "x3");
+				}
+			}
+			BigPolinom reduced = new BigPolinom(maxvars, buffS, base.getMode());
+			buffS = reduced.reduce2(base.getBasis(), 0, true, true).toString();
+			if(mode != 0)
+			{
+				buffS = buffS.replace("x1", "x");
+				buffS = buffS.replace("x2", "y");
+				buffS = buffS.replace("x3", "z");
+			}
+			System.out.println("Результат редукции: " + buffS);
+		}
+		catch(Throwable t)
+		{
+			System.out.println("Ошибка reduceInput, попробуйте еще раз.");
+			//System.out.println(t);
+		}
+	}
+	
+	private static void changeOrder()
+	{
+		String buffS;
+		ArrayList<Integer> order = new ArrayList<Integer>();
+		ArrayList<BigPolinom> polys = base.getBase();
+		int maxvars = base.getMaxVars();
+		int k = 0;
+		int i;
+		System.out.println("Напомним, всего неизвестных " + maxvars);
+		try
+		{
+			System.out.println("Введите построчно порядок неизвестных");
+			while(order.size() != maxvars)
+			{
+				Scanner orderIn = new Scanner(System.in);
+				k = orderIn.nextInt();
+				if(k > 0 && k <= maxvars)
+				{
+					if(order.indexOf(k) == -1)
+						order.add(k);
+					else
+					{
+						System.out.println("Данный индекс уже был использован");
+						System.out.println("Текущий порядок: " + order);
+					}
+				}
+				else
+					System.out.println("Такого индекса быть не может. Максимум " + maxvars);
+			}
+			for(i = 0; i < order.size(); i++)
+				order.set(i, order.get(i)-1);
+			base.setMode(order);
+			for(i = 0; i < polys.size(); i++)
+			{
+				polys.get(i).setMode(order);
+			}
+		}
+		catch(Throwable t)
+		{
+			System.out.println("Ошибка ввода, попробуйте еще раз.");
+			//System.out.println(t);
+		}
 	}
 }
