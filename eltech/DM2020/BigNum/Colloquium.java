@@ -440,7 +440,14 @@ public class Colloquium
 					i++;
 				}
 			} while(!buffS.equals("") && i < 2);
-			System.out.println("S-полином: " + first.sPolynom(second));
+			buffS = first.sPolynom(second).toString();
+			if(mode != 0)
+			{
+				buffS = buffS.replace("x1", "x");
+				buffS = buffS.replace("x2", "y");
+				buffS = buffS.replace("x3", "z");
+			}
+			System.out.println("S-полином: " + buffS);
 		}
 		catch(Throwable t)
 		{
