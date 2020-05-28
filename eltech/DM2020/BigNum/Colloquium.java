@@ -133,7 +133,10 @@ public class Colloquium
 					case "changeorder":
 					{
 						if(inputed != 0)
+						{
 							changeOrder();
+							formed = 0;
+						}
 						else
 							System.out.println("Вы не вводили полиномы. Введите input(или in), чтобы ввести их.");
 						break;

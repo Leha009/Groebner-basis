@@ -10,8 +10,8 @@ import java.util.*;
 public class BigMonom
 {
 	private BigQ coef;												//коэффициент
-	private ArrayList<Integer> powers = new ArrayList<Integer>();	//степени x_i
-	private ArrayList<Integer> mode = new ArrayList<Integer>();	//режим сортировки
+	private ArrayList<Integer> powers = new ArrayList<Integer>();	//степени
+	private ArrayList<Integer> mode = new ArrayList<Integer>();		//режим сортировки
 	
 	private BigMonom() {}
 	
@@ -225,9 +225,11 @@ public class BigMonom
 	{
         int i;
         BigMonom result = this.clone();
-		BigMonom buffOther;
-		buffOther = other.clone();
+		BigMonom buffOther = other.clone();
+		//Перемножаем коэффициенты
 		result.coef = result.coef.multiply(buffOther.coef);
+		//Увеличиваем степени неизвестных или добавляем то, чего нет
+		//Например, xy * x^z = x^2yz
 		for(i = 0; i < result.powers.size(); i++)
 			result.powers.set(i, result.powers.get(i) + buffOther.powers.get(i) );
         return result;

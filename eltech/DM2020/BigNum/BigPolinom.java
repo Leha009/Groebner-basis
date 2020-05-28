@@ -10,7 +10,7 @@ import java.util.concurrent.TimeUnit;	//для отсчитывания секу
 public class BigPolinom
 {
 	private ArrayList<BigMonom> factors = new ArrayList<BigMonom>();
-	private ArrayList<Integer> mode = new ArrayList<Integer>();															//режим сортировки: 0 - лексический, 1 - обратный лексический
+	private ArrayList<Integer> mode = new ArrayList<Integer>();				//режим сортировки
 
 	private BigPolinom() {}
 
@@ -128,8 +128,6 @@ public class BigPolinom
     {
 		if(this.isZero() || other.isZero())
 			return this.factors.size() >= other.factors.size() ? (this.factors.size() == other.factors.size() ?  0 : 1 ) : -1 ;
-		/*if(mode != 0)
-			return this.factors.get(0).compareTo2( other.factors.get(0) );*/
 		return this.factors.get(0).compareTo( other.factors.get(0) );
     }
 
@@ -276,14 +274,15 @@ public class BigPolinom
     */
 	public BigPolinom multiply(BigPolinom other)
 	{
+		//Если один из множителей равен 0, то и ответ 0
 		if(this.isZero())
-			return new BigPolinom(other.factors.get(0).getPowers().size(), "1");
+			return new BigPolinom(other.factors.get(0).getPowers().size(), "0");
 		else if(other.isZero())
-			return new BigPolinom(this.factors.get(0).getPowers().size(), "1");
+			return new BigPolinom(this.factors.get(0).getPowers().size(), "0");
+		//Если второй множитель - единица, то просто вернем первый множитель
 		if(other.toString().equals("1"))
 			return this.clone();
         int i,j,index;
-		String buffS = "0";
         BigPolinom result = new BigPolinom();
 		BigPolinom buffThis = new BigPolinom(this.factors.get(0).getPowers().size(), "1");
         BigPolinom buffOther = new BigPolinom(other.factors.get(0).getPowers().size(), "1");
@@ -291,10 +290,15 @@ public class BigPolinom
         for(i = 0; i < this.factors.size(); i++)
             for(j = 0; j < other.factors.size(); j++)
 			{
+				//берем по очереди члены из первого полинома и второго
 				buffThis.factors.set(0, this.factors.get(i) );
 				buffOther.factors.set(0, other.factors.get(j) );
+				//Перемножаем эти члены(функция показана ранее)
 				buffThis.factors.set(0, buffThis.factors.get(0).multiply(buffOther.factors.get(0)) );
+				//Смотрим, есть ли результат умножения в результирующем полиноме
 				index = result.monomIndex( buffThis.factors.get(0) );
+				//Если есть, то меняем коэффициент
+				//Иначе просто добавляем одночлен ко всем остальным
 				if(index != -1)
 				{
 					resultCoef = result.factors.get(index).getCoef();
@@ -306,6 +310,7 @@ public class BigPolinom
 					result.factors.add( buffThis.factors.get(0) );
 				}
 			}
+		//Сортируем одночлены
 		result.sort();
         return result;
 	}
@@ -350,9 +355,9 @@ public class BigPolinom
 	
 	public BigPolinom multiply(BigMonom other)	//Умножение на моном
 	{
-        int i,j,index;
-		String buffS = "0";
+        int i;
         BigPolinom result = this.clone();
+		//Умножаем каждый моном в полином на моном other
         for(i = 0; i < this.factors.size(); i++)
 			result.factors.set(i, this.factors.get(i).multiply(other));
         return result;
@@ -395,20 +400,25 @@ public class BigPolinom
 		BigPolinom buffOther = other.clone();
 		BigMonom multiplier;
 		BigPolinom zero = new BigPolinom(this.factors.get(0).getPowers().size(), "0");
+		//Если делимое меньше делителя, или не делится на него,
+		//то частное = 0, остаток = делимое
 		if(buffThis.isLessThan(buffOther))
 			return new Case(zero, buffThis);
-		
 		if(!this.isDivided(other))
 			return new Case(zero, buffThis);
+		//Пока делимое больше или равно делителю
 		while(buffThis.isMoreOrEquals(buffOther))
 		{
-			multiplier = buffOther.getHighMonom().getMultiplier(buffThis.getHighMonom());		//Здесь получаем моном, на который нужно умножить старший член buffOther, чтобы получить старший член buffThis
-			result.factors.add(multiplier);														//В частное добавляем этот моном
-			buffThis = buffThis.subtract( buffOther.multiply(multiplier) );					//Вычитаем из buffThis полином buffOther, умноженный на multiplier
-			/*if(!buffThis.isZero())	//убрать?
-				buffThis.divideByHighCoef();*/
+			//Здесь получаем моном, на который нужно умножить старший член buffOther,
+			//чтобы получить старший член buffThis
+			multiplier = buffOther.getHighMonom().getMultiplier(buffThis.getHighMonom());
+			//В частное добавляем этот моном
+			result.factors.add(multiplier);							
+			//Вычитаем из buffThis полином buffOther, умноженный на multiplier			
+			buffThis = buffThis.subtract( buffOther.multiply(multiplier) );
 		}
-		//result.sort2();
+		result.sort();
+		buffThis.sort();
 		return new Case(result, buffThis);		//Частное, остаток
 	}
 	

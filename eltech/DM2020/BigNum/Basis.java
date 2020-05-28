@@ -674,7 +674,6 @@ public class Basis
 				if(buffMaxPowers.get(j) > toMaxPowers.get(j))
 					toMaxPowers.set(j, buffMaxPowers.get(j));
 		}
-		
 		while(toMaxPowers.size() != order.size())
 		{
 			i = 0;
@@ -692,7 +691,6 @@ public class Basis
 			toMaxPowers.set(maxi, -1);
 		}
 		Collections.reverse(order);
-		
 		for(i = 0; i < this.basePolynoms.size(); i++)
 			this.basePolynoms.get(i).setMode(order);
 		this.mode = order;
