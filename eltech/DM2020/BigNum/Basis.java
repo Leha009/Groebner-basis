@@ -593,16 +593,19 @@ public class Basis
 		String buffS;
 		if(decision == null)
 			decision();
-		buffS = decision.toString();
-		if(type != 0)
+		if(decision != null)
 		{
-			buffS = buffS.replace("x1", "x");
-			buffS = buffS.replace("x2", "y");
-			buffS = buffS.replace("x3", "z");
+			buffS = decision.toString();
+			if(type != 0)
+			{
+				buffS = buffS.replace("x1", "x");
+				buffS = buffS.replace("x2", "y");
+				buffS = buffS.replace("x3", "z");
+			}
+			System.out.println(buffS + "\n");
+			System.out.print("Количество решений: ");
+			System.out.println(decision.getHighMonom().getHighPower());
 		}
-		System.out.println(buffS + "\n");
-		System.out.print("Количество решений: ");
-		System.out.println(decision.getHighMonom().getHighPower());
 	}
 	
 	/**

@@ -21,13 +21,12 @@ public class Colloquium
 		Interface();
 		
 		/*ArrayList<Integer> dj = new ArrayList<Integer>();
-		dj.add(1);
 		dj.add(0);
+		dj.add(1);
 		dj.add(2);
-		BigPolinom test = new BigPolinom(3, "-1944/49*x2^10 + 9720/49*x2^9 - 18630/49*x2^8 + 16200/49*x2^7 - 5940/49*x2^6 + 1944/49*x2^5 - 2385/49*x2^4 + 990/49*x2^3 - 663/98*x2^2 + 753/98*x2 - 559/392-1944/49*x2^10", dj);
-		BigPolinom test2 = new BigPolinom(3, "x1^3*x2^2 + 1*x1^2", dj);
-		BigMonom test3 = new BigMonom(3, "x1x2", dj);
-		System.out.println(test.getHighMonom().getHighPower());
+		BigMonom test = new BigMonom(3, "x1^4x2", dj);
+		BigMonom test2 = new BigMonom(3, "x1x2x3", dj);
+		System.out.println(test.lcm(test2));
 		//System.out.println(test2+"\n");
 		//System.out.println(test2.multiply(test3));
 		//System.out.println(test.sPolynom(test2));
@@ -155,8 +154,8 @@ public class Colloquium
 			}
 			catch(Throwable t)
 			{
-				//System.out.println("Упс... Произошла неизвестная ошибка!");
-				System.out.println(t);
+				System.out.println("Упс... Произошла неизвестная ошибка!");
+				//System.out.println(t);
 			}
 		}
 	}
@@ -320,7 +319,7 @@ public class Colloquium
 		}
 		catch(Throwable t)
 		{
-			System.out.println("Ошибка reduceInput, попробуйте еще раз.");
+			System.out.println("Ошибка ввода, попробуйте еще раз.");	
 			//System.out.println(t);
 		}
 	}
