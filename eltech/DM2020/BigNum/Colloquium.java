@@ -12,6 +12,7 @@ import java.io.*;
 public class Colloquium
 {
 	private static Basis base = new Basis();
+	private static Example examples = new Example();
 	private static Scanner in = new Scanner(System.in);
 	private static int mode;
 	
@@ -151,6 +152,13 @@ public class Colloquium
 					{
 						inputBasis();
 						formed = 1;
+						break;
+					}
+					case "generate":{}
+					case "gen":
+					{
+						generateExample();
+						inputed = 1;
 						break;
 					}
 					default:
@@ -535,6 +543,43 @@ public class Colloquium
 				buffS = buffS.replace("x3", "z");
 			}
 			//System.out.println("S-полином: " + buffS);
+		}
+		catch(Throwable t)
+		{
+			System.out.println("Ошибка ввода, попробуйте еще раз.");
+			//System.out.println(t);
+		}
+	}
+	
+	private static void generateExample()
+	{
+		Scanner num = new Scanner(System.in);
+		String buffS;
+		ArrayList<BigPolinom> polys = examples.getExample();
+		ArrayList<Integer> order = polys.get(0).getMode();
+		int amount, i;
+		amount = polys.get(0).getFactors().get(0).getPowers().size();
+		base.clearAll();
+		base.setMaxVars(amount);
+		base.setMode(order);
+		try
+		{
+			if(amount < 4)
+			{
+				Scanner num2 = new Scanner(System.in);
+				System.out.println("\nВведите любое число, отличное от нуля, чтобы использовать следующий вид переменных: x y z");
+				System.out.print("> ");
+				mode = num2.nextInt();
+			}
+			else
+				mode = 0;
+			for(i = 0; i < polys.size(); i++)
+			{
+				buffS = polys.get(i).toString();
+				if(!buffS.equals(""))
+					base.addBase(buffS);
+			}
+			System.out.println("Введите out, чтобы увидеть текущую систему. Чтобы сформировать базис введите basis");
 		}
 		catch(Throwable t)
 		{

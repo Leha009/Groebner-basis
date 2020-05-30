@@ -822,11 +822,6 @@ public class BigPolinom
 		return true;
 	}
 	
-	public ArrayList<BigMonom> getFactors()
-	{
-		return factors;
-	}
-	
 	/**
     * Сортировка полинома
     *
@@ -948,5 +943,10 @@ public class BigPolinom
 	public ArrayList<Integer> getMode()
 	{
 		return mode;
+	}
+	
+	public ArrayList<BigMonom> getFactors()
+	{
+		return factors;
 	}
 }
