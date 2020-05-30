@@ -608,6 +608,7 @@ public class BigPolinom
     */
 	public BigPolinom sPolynom(BigPolinom other)
 	{
+		System.out.println("Строим S-многочлен многочленов: " + this + " и " + other);
 		BigPolinom result = new BigPolinom();
 		BigPolinom buffThis = this.clone();
 		BigPolinom buffOther = other.clone();
@@ -621,6 +622,7 @@ public class BigPolinom
 		buffOther = buffOther.multiply(multiplier);
 		//вычитаем из первого полинома второй
 		result = buffThis.subtract(buffOther);
+		System.out.println("S-многочлен: " + result);
 		return result;
 	}
 	
@@ -652,6 +654,7 @@ public class BigPolinom
 	public BigPolinom reduce2(ArrayList<BigPolinom> basis, long startTime, boolean changed, boolean reducePoly)
 	{
 		int i, f;
+		System.out.println("Редуцируем: " + this);
 		//buffThis - редуцируемый полином
 		BigPolinom buffThis = this.clone();
 		//result - полином после редукции
@@ -711,6 +714,7 @@ public class BigPolinom
 			}
 		} while(!buffThis.isZero());
 		result.sort();
+		System.out.println("Результат редукции: " + result);
 		return result;
 	}
 	
@@ -728,7 +732,11 @@ public class BigPolinom
 		if(f == 0 && !reduced.isZero())
 			basis.add(reduced);
 		else
+		{
+			if(f > 0)
+				System.out.println("Такой многочлен уже есть, не добавляем его");
 			return false;
+		}
 		return true;
 	}
 	

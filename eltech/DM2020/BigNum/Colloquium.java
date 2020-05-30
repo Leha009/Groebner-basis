@@ -315,7 +315,7 @@ public class Colloquium
 				buffS = buffS.replace("x2", "y");
 				buffS = buffS.replace("x3", "z");
 			}
-			System.out.println("Результат редукции: " + buffS);
+			//System.out.println("Результат редукции: " + buffS);
 		}
 		catch(Throwable t)
 		{
@@ -449,7 +449,7 @@ public class Colloquium
 				buffS = buffS.replace("x2", "y");
 				buffS = buffS.replace("x3", "z");
 			}
-			System.out.println("S-полином: " + buffS);
+			//System.out.println("S-полином: " + buffS);
 		}
 		catch(Throwable t)
 		{
