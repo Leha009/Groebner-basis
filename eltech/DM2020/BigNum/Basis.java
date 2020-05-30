@@ -58,10 +58,24 @@ public class Basis
     * @version 1
     * @author 
     */
-	public void addBasis(String newPolynom)
+	public void addBase(String newPolynom)
 	{
 		//polynoms.add( new BigPolinom(maxvars, newPolynom) );
 		basePolynoms.add( new BigPolinom(maxvars, newPolynom, mode) );
+	}
+	
+	/**
+    * Ввод базиса
+	*
+	* @param String newPolynom - Новый полином для добавления
+    *
+    * @version 1
+    * @author 
+    */
+	public void addBasis(String newPolynom)
+	{
+		polynoms.add( new BigPolinom(maxvars, newPolynom) );
+		//basePolynoms.add( new BigPolinom(maxvars, newPolynom, mode) );
 	}
 	
 	/**
@@ -274,7 +288,7 @@ public class Basis
 		boolean f = false;
 		BigPolinom buff;
 		int i = 0;
-		System.out.println("До упрощения");
+		System.out.println("\nДо упрощения");
 		output(0);
 		do				//Упрощаем базисы
 		{
@@ -320,7 +334,7 @@ public class Basis
 		Integer i,j,k;
 		BigPolinom buff;
 		//System.out.println("size : " + this.polynoms.size());
-		System.out.println("До построения S-многочленов с зацеплением");
+		System.out.println("\nДо построения S-многочленов с зацеплением");
 		output(0);
 		for(i = 0; i < this.polynoms.size(); i++)
 			for(j = 0; j < this.polynoms.size(); j++)
@@ -369,7 +383,7 @@ public class Basis
 		Integer i,j,k;
 		BigPolinom buff;
 		//System.out.println("size : " + this.polynoms.size());
-		System.out.println("До построения всех возможных S-многочленов");
+		System.out.println("\nДо построения всех возможных S-многочленов");
 		output(0);
 		for(i = 0; i < this.polynoms.size(); i++)
 			for(j = 0; j < this.polynoms.size(); j++)

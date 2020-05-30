@@ -21,12 +21,12 @@ public class Colloquium
 		Interface();
 		
 		/*ArrayList<Integer> dj = new ArrayList<Integer>();
-		dj.add(0);
-		dj.add(1);
 		dj.add(2);
-		BigMonom test = new BigMonom(3, "x1^4x2", dj);
-		BigMonom test2 = new BigMonom(3, "x1x2x3", dj);
-		System.out.println(test.lcm(test2));
+		dj.add(1);
+		dj.add(0);
+		BigPolinom test = new BigPolinom(3, "x1^3+x1x2", dj);
+		BigPolinom test2 = new BigPolinom(3, "x1+x2", dj);
+		System.out.println(test.mod(test2));
 		//System.out.println(test2+"\n");
 		//System.out.println(test2.multiply(test3));
 		//System.out.println(test.sPolynom(test2));
@@ -146,6 +146,13 @@ public class Colloquium
 						SPolynom();
 						break;
 					}
+					case "inputbasis":{}
+					case "inbasis":
+					{
+						inputBasis();
+						formed = 1;
+						break;
+					}
 					default:
 					{
 						System.out.println("Данной команды не существует. Посмотрите команды в help.");
@@ -240,7 +247,7 @@ public class Colloquium
 						buffS = buffS.replace("y", "x2");
 						buffS = buffS.replace("z", "x3");
 					}
-					base.addBasis(buffS);
+					base.addBase(buffS);
 				}
 			} while(!buffS.equals(""));
 			//base.settingMode();
@@ -360,6 +367,84 @@ public class Colloquium
 			{
 				polys.get(i).setMode(order);
 			}
+		}
+		catch(Throwable t)
+		{
+			System.out.println("Ошибка ввода, попробуйте еще раз.");
+			//System.out.println(t);
+		}
+	}
+	
+	private static void inputBasis()
+	{
+		Scanner num = new Scanner(System.in);
+		String buffS;
+		ArrayList<Integer> order = new ArrayList<Integer>();
+		int amount = 0;
+		int k = 0;
+		int i;
+		System.out.println("Введите количество неизвестных");
+		try
+		{
+			do
+			{
+				System.out.print("> ");
+				amount = num.nextInt();
+			} while(amount < 1);
+			System.out.println("Введите построчно порядок неизвестных");
+			while(order.size() != amount)
+			{
+				Scanner orderIn = new Scanner(System.in);
+				k = orderIn.nextInt();
+				if(k > 0 && k <= amount)
+				{
+					if(order.indexOf(k) == -1)
+						order.add(k);
+					else
+					{
+						System.out.println("Данный индекс уже был использован");
+						System.out.println("Текущий порядок: " + order);
+					}
+				}
+				else
+					System.out.println("Такого индекса быть не может. Максимум " + amount);
+			}
+			for(i = 0; i < order.size(); i++)
+				order.set(i, order.get(i)-1);
+			System.out.println("Ввод многочленов имеет следующий вид: каждая переменная должна содержать индекс после себя, например, 45x1 + 7/5x2^7");
+			base.clearAll();
+			base.setMaxVars(amount);
+			base.setMode(order);
+			if(amount < 4)
+			{
+				Scanner num2 = new Scanner(System.in);
+				System.out.println("\nВведите любое число, отличное от нуля, чтобы использовать следующий вид переменных: x y z");
+				System.out.print("> ");
+				mode = num2.nextInt();
+			}
+			else
+				mode = 0;
+			System.out.println("\nПострочно вводите полиномы. Чтобы прекратить ввод, нажмите Enter");
+			do
+			{
+				buffS = in.nextLine();
+				if(!buffS.equals(""))
+				{
+					if(mode != 0)
+					{
+						buffS = buffS.replace("x", "x1");
+						buffS = buffS.replace("y", "x2");
+						buffS = buffS.replace("z", "x3");
+					}
+					else
+					{
+						buffS = buffS.replace("y", "x2");
+						buffS = buffS.replace("z", "x3");
+					}
+					base.addBasis(buffS);
+				}
+			} while(!buffS.equals(""));
+			//base.settingMode();
 		}
 		catch(Throwable t)
 		{

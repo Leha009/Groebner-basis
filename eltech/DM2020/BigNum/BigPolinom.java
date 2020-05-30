@@ -608,7 +608,7 @@ public class BigPolinom
     */
 	public BigPolinom sPolynom(BigPolinom other)
 	{
-		System.out.println("Строим S-многочлен многочленов: " + this + " и " + other);
+		System.out.println("\nСтроим S-многочлен многочленов: " + this + " и " + other);
 		BigPolinom result = new BigPolinom();
 		BigPolinom buffThis = this.clone();
 		BigPolinom buffOther = other.clone();
@@ -654,7 +654,7 @@ public class BigPolinom
 	public BigPolinom reduce2(ArrayList<BigPolinom> basis, long startTime, boolean changed, boolean reducePoly)
 	{
 		int i, f;
-		System.out.println("Редуцируем: " + this);
+		System.out.println("\nРедуцируем: " + this);
 		//buffThis - редуцируемый полином
 		BigPolinom buffThis = this.clone();
 		//result - полином после редукции
