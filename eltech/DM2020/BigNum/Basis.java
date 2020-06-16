@@ -205,9 +205,8 @@ public class Basis
 			} while(f);
 			if(time > LIMIT)
 			{
-				System.out.println("Изменен режим сортировки, базис примет более приятный вид после просчета");
 				settingMode();
-				clearBasis();
+				//clearBasis();
 				changed = true;
 				Buhberger();
 			}
@@ -722,14 +721,19 @@ public class Basis
 			toMaxPowers.set(maxi, -1);
 		}
 		Collections.reverse(order);
-		for(i = 0; i < this.basePolynoms.size(); i++)
-			this.basePolynoms.get(i).setMode(order);
-		this.mode = order;
-		this.ourFirstMode = order;
-		System.out.print("Упорядочивание:");
-		for(i = 0; i < order.size(); i++)
-			System.out.print(" x" + (order.get(i)+1));
-		System.out.println("");
+		if(!polynoms.get(0).getMode().equals(order))
+		{
+			for(i = 0; i < this.basePolynoms.size(); i++)
+				this.basePolynoms.get(i).setMode(order);
+			clearBasis();
+			this.mode = order;
+			this.ourFirstMode = order;
+			System.out.println("Изменен режим сортировки, базис примет более приятный вид после просчета");
+			System.out.print("Упорядочивание:");
+			for(i = 0; i < order.size(); i++)
+				System.out.print(" x" + (order.get(i)+1));
+			System.out.println("");
+		}
 	}
 	
 	/**

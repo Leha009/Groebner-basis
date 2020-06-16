@@ -86,6 +86,7 @@ public class Colloquium
 						break;
 					}
 					case "outputbasis":{}
+					case "outbasis":{}
 					case "outb":
 					{
 						if(formed == 1)
@@ -579,7 +580,10 @@ public class Colloquium
 				if(!buffS.equals(""))
 					base.addBase(buffS);
 			}
-			System.out.println("Введите out, чтобы увидеть текущую систему. Чтобы сформировать базис введите basis");
+			System.out.println("Предлагаемый порядок: ");
+			for(i = 0; i < order.size(); i++)
+				System.out.print("x" + (order.get(i)+1) + " ");
+			System.out.println("\nВведите out, чтобы увидеть текущую систему. Чтобы сформировать базис введите basis");
 		}
 		catch(Throwable t)
 		{
