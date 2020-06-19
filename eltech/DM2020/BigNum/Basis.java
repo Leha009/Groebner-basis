@@ -287,8 +287,8 @@ public class Basis
 		boolean f = false;
 		BigPolinom buff;
 		int i = 0;
-		System.out.println("\nДо упрощения");
-		output(0);
+		//System.out.println("\nДо упрощения");
+		//output(0);
 		do				//Упрощаем базисы
 		{
 			if(!changed)
@@ -313,8 +313,8 @@ public class Basis
 			i++;
 			//System.out.println(i + "/" + this.polynoms.size());
 		} while(i < this.polynoms.size());
-		System.out.println("После упрощения");
-		output(0);
+		//System.out.println("После упрощения");
+		//output(0);
 		newLinkList();
 		return f;
 	}
@@ -333,8 +333,8 @@ public class Basis
 		Integer i,j,k;
 		BigPolinom buff;
 		//System.out.println("size : " + this.polynoms.size());
-		System.out.println("\nДо построения S-многочленов с зацеплением");
-		output(0);
+		//System.out.println("\nДо построения S-многочленов с зацеплением");
+		//output(0);
 		for(i = 0; i < this.polynoms.size(); i++)
 			for(j = 0; j < this.polynoms.size(); j++)
 			{
@@ -362,8 +362,8 @@ public class Basis
 					//System.out.println("SPoly: " + i + " : " + j + " size:" + this.polynoms.size());
 				}
 			}
-		System.out.println("После построения S-многочленов с зацеплением");
-		output(0);
+		//System.out.println("После построения S-многочленов с зацеплением");
+		//output(0);
 		//System.out.println("POLY " + f);
 		return f;
 	}
@@ -382,8 +382,8 @@ public class Basis
 		Integer i,j,k;
 		BigPolinom buff;
 		//System.out.println("size : " + this.polynoms.size());
-		System.out.println("\nДо построения всех возможных S-многочленов");
-		output(0);
+		//System.out.println("\nДо построения всех возможных S-многочленов");
+		//output(0);
 		for(i = 0; i < this.polynoms.size(); i++)
 			for(j = 0; j < this.polynoms.size(); j++)
 			{
@@ -412,8 +412,8 @@ public class Basis
 				}
 			}
 		//System.out.println("POLY " + f);
-		System.out.println("После построения всех возможных S-многочленов");
-		output(0);
+		//System.out.println("После построения всех возможных S-многочленов");
+		//output(0);
 		return f;
 	}
 	
@@ -478,7 +478,7 @@ public class Basis
 				if(i != j)
 					if(polynoms.get(i).getHighMonom().lcm(polynoms.get(j).getHighMonom()).isDivided(buff) && isLinked(i,j))
 					{
-						System.out.println("Редуцируется к нулю");
+						//System.out.println("Редуцируется к нулю");
 						return true;
 					}
 		return false;
